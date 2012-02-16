@@ -47,8 +47,8 @@ And run the shell script:
     cd nypd-crash-data-bandaid/
     ./download.sh
 
-You will now be graced with a folder, named in the format YYYYMM, with
-borough-by-borough crash data as a CSV.
+You will now be graced with a folder inside `data/`, named in the
+format `YYYYMM`, with borough-by-borough crash data as a CSV.
 
 If you have already downloaded the data currently on the site, the
 script will bow out gracefully and tell you there is no new data.  The
