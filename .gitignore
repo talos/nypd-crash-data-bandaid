@@ -1,5 +1,5 @@
 .DS_Store
-pdfs/*
-*.txt
-*.pdf
-*.csv
+feed.xml
+data/*
+config.ini
+log.txt
