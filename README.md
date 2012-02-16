@@ -55,6 +55,8 @@ script will bow out gracefully and tell you there is no new data.  The
 NYPD doesn't keep historical files, but the script's placement of the
 CSV makes it easy for you to.
 
+You can even adapt the sample cronjob to run the script daily.
+
 ## Credit
 
 Thanks to David Turner for writing the original scrapeintersections.py
@@ -70,15 +72,13 @@ OK, OK.  Go to:
 
 [http://nypd.openscrape.com/](http://nypd.openscrape.com/)
 
-Historical data will be kept there, too.  Watch out for an RSS feed.
+Historical data will be kept there, too.  Watch the [RSS feed][]!
+
+  [RSS feed]: http://nypd.openscrape.com/feed.xml
 
 ## I wanna API! I wanna make mashups!
 
 Data's there.  I'm not stopping you. ;)
-
-## TODOS
-
-* A sample cronjob
 
 ## License
 
