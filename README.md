@@ -44,6 +44,7 @@ Then, clone the repo:
 
 And run the shell script:
 
+    cd nypd-crash-data-bandaid/
     ./download.sh
 
 You will now be graced with a folder, named in the format YYYYMM, with
