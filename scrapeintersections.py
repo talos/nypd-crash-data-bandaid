@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # By David Turner
 # Copyright 2011, OpenPlans
@@ -16,22 +16,44 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licences/>
 
+# Further modifications to enhance CSV output and multidimensionality
+# by John Krauss.
+
 #To use this, first run pdftotext -layout on the pdf, then run this
 #on the resulting text file
 
-
 import re
 import sys
-from geopy import geocoders
-import time
 
 EOP = "\x0c"
 
-def make_intersection(precinct):
+CATEGORIES = 'categories'
+VEHICLES = 'vehicles'
+
+YEAR = 'year'
+MONTH = 'month'
+CATEGORY = 'category'
+INJURED = 'injured'
+KILLED = 'killed'
+VEHICLE_TYPE = 'vehicle_type'
+VEHICLE_COUNT = 'vehicle_count'
+PRECINCT = 'precinct'
+ACCIDENTS = 'accidents'
+ACCIDENTS_WITH_INJURIES = 'accidents_with_injuries'
+INVOLVED = 'involved'
+STREET_NAME = 'street_name'
+
+HEADERS = [ YEAR, MONTH, PRECINCT, STREET_NAME,
+            ACCIDENTS_WITH_INJURIES, ACCIDENTS, INVOLVED,
+            CATEGORY, INJURED, KILLED, VEHICLE_TYPE, VEHICLE_COUNT ]
+
+def make_intersection(precinct, month, year):
     intersection = {}
-    intersection['category'] = []
-    intersection['veh_types'] = []
-    intersection['precinct'] = precinct
+    intersection[CATEGORIES] = {}
+    intersection[VEHICLES] = {}
+    intersection[PRECINCT] = precinct
+    intersection[MONTH] = month
+    intersection[YEAR] = year
     return intersection
 
 header_frags = [ "NYPD Precincts Map",
@@ -65,7 +87,14 @@ def parse_lines(lines):
     veh_types = ""
     intersections = []
     intersection = None
+    month_year = None # two-tuple (month, year)
     for line in lines:
+
+        # pull out month & year if we haven't already.
+        if not month_year:
+            match = re.search(r'(january|february|march|april|may|june|july|august|september|december)\s+(\d+)', line, flags=re.I)
+            if match:
+                month_year = (match.group(1), match.group(2))
 
         #we might at any time hit a header line of some sort. 
         if len(line) < 50:
@@ -73,7 +102,7 @@ def parse_lines(lines):
             if "Precinct" in line:
                 precinct = line.strip()
                 if intersection is None:
-                    intersection = make_intersection(precinct)
+                    intersection = make_intersection(precinct, month_year[0], month_year[1])
             continue
 
         #could be useful data, or could be headers
@@ -82,7 +111,7 @@ def parse_lines(lines):
             if header in line:
                 good = False
                 break
-        if not good: 
+        if not good:
             continue
         if not line.strip():
             continue
@@ -90,59 +119,71 @@ def parse_lines(lines):
         street_name += line[:26].strip() + " "
         accidents = line[26:36].strip()
         if accidents:
-            intersection['accidents'] = accidents
+            intersection[ACCIDENTS] = accidents
         involved = line[36:46].strip()
         if accidents:
-            intersection['involved'] = involved
+            intersection[INVOLVED] = involved
         with_injuries = line[46:56].strip()
         if accidents:
-            intersection['accidents_with_injuries'] = with_injuries
+            intersection[ACCIDENTS_WITH_INJURIES] = with_injuries
         category = line[56:71].strip()
         injured = line[71:81].strip()
         killed  = line[81:87].strip()
         if category:
-            intersection['category'].append(category)
-            intersection['category'].append(injured)
-            intersection['category'].append(killed)
+            intersection[CATEGORIES][category] = {}
+            intersection[CATEGORIES][category][INJURED] = injured
+            intersection[CATEGORIES][category][KILLED] = killed
 
         veh_types += line[87:105].strip() + " "
         n_veh_types = line[105:110].strip()
         if n_veh_types:
-            intersection['veh_types'].append(veh_types.strip())
-            intersection['veh_types'].append(n_veh_types.strip())
+            intersection[VEHICLES][veh_types.strip()] = n_veh_types.strip()
             veh_types = ''
-        contributing = line[110:].strip()
+        contributing = line[110:].strip() # this does nothing
 
         if category == 'Total':
             #we are done this intersection
-            intersection['street_name'] = street_name.strip()
+            intersection[STREET_NAME] = street_name.strip()
             street_name = ''
             intersections.append(intersection)
-            intersection = make_intersection(precinct)
+            intersection = make_intersection(precinct, month_year[0], month_year[1])
 
     return intersections
 
 
-if not len(sys.argv) == 3:
-    print "usage: scrapeintersections.py mnacc.txt manhattan"
+if len(sys.argv) != 2:
+    print """
+usage: scrapeintersections.py [file]
+"""
     sys.exit(1)
-filename = sys.argv[1]
-boro = sys.argv[2]
 
-geocoder = geocoders.Google()
+filename = sys.argv[1]
+
 f = open(filename)
 
 lines = f.readlines()
 intersections = parse_lines(lines)
+
+print ','.join(HEADERS)
+
 for intersection in intersections:
-    #Uncomment this for geocoding, but it doesn't really work -- someone please hack it to support
-    #disambiguation.
-    #place, (lat, lng) = geocoder.geocode("%s, %s, New York" % (intersection['street_name'], boro))
-    #print "%s, %s," % (lat, lng),
-    #time.sleep(2)
-    for k in sorted(intersection.keys()):
-        data = intersection[k]
-        if isinstance(data, list):
-            data = ",".join(data)
-        print "%s, %s," % (k, data),
-    print
+
+    # watchu doin in the intersection?
+    if VEHICLES in intersection:
+        for vehicle_type, vehicle_count in intersection[VEHICLES].items():
+            intersection[VEHICLE_TYPE] = vehicle_type
+            intersection[VEHICLE_COUNT] = vehicle_count
+            print ','.join([intersection.get(header, '') for header in HEADERS])
+            intersection.pop(VEHICLE_TYPE)  #TODO this is ugly
+            intersection.pop(VEHICLE_COUNT)
+
+
+    if CATEGORIES in intersection:
+        for category, category_data in intersection[CATEGORIES].items():
+            intersection[CATEGORY] = category
+            intersection[INJURED] = category_data[INJURED]
+            intersection[KILLED] = category_data[KILLED]
+            print ','.join([intersection.get(header, '') for header in HEADERS])
+            intersection.pop(CATEGORY)  #TODO this is ugly
+            intersection.pop(INJURED)
+            intersection.pop(KILLED)
