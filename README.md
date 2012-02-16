@@ -21,7 +21,7 @@ NYPD traffic crash [data][] has a booboo. This eases the pain.
 Want to automatically download the latest NYPD traffic crash data as a
 CSV instead of PDF?  Done!
 
-### Installation
+## Installation
 
 First, make sure you have the handy pdftotext utility, part of [xpdf][].
 
@@ -40,19 +40,21 @@ Debian:
 
 Then, clone the repo:
 
-
     git clone https://github.com/talos/nypd-crash-data-bandaid.git
 
 And run the shell script:
 
-
     ./download.sh
-
 
 You will now be graced with a folder, named in the format YYYYMM, with
 borough-by-borough crash data as a CSV.
 
-### Credit
+If you have already downloaded the data currently on the site, the
+script will bow out gracefully and tell you there is no new data.  The
+NYPD doesn't keep historical files, but the script's placement of the
+CSV makes it easy for you to.
+
+## Credit
 
 Thanks to David Turner for writing the original scrapeintersections.py
 script.  It is accessible [here](http://novalis.org/programs/scrapeintersections.txt).
@@ -61,7 +63,7 @@ Thanks to Matthew Kime for suggesting the name.
 
 Thanks to [Streetsblog](http://www.streetsblog.org/) for being awesome.
 
-### Just give me the data already!
+## Just give me the data already!
 
 OK, OK.  Go to:
 
@@ -69,10 +71,14 @@ OK, OK.  Go to:
 
 Historical data will be kept there, too.  Watch out for an RSS feed.
 
-### I wanna API! I wanna make mashups!
+## I wanna API! I wanna make mashups!
 
 Data's there.  I'm not stopping you. ;)
 
-### License
+## TODOS
+
+* A sample cronjob
+
+## License
 
 GPLv3, just as it should be.
