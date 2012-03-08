@@ -54,4 +54,4 @@ rss = PyRSS2Gen.RSS2(
        for data_dir in os.listdir( DATA_PATH )]
     )
 
-rss.write_xml(open(os.sep.join([DATA_PATH, "feed.xml"]), "w"))
+rss.write_xml(open(os.sep.join([PRIVATE_DATA_PATH, "feed.xml"]), "w"))
