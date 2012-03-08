@@ -5,7 +5,7 @@ PATH=${PATH}:./
 # Test the waters.
 wget http://www.nyc.gov/html/nypd/downloads/pdf/traffic_data/bxacc.pdf
 pdftotext -layout bxacc.pdf
-DIR=data/$(findmonthyear.py bxacc.txt)
+DIR=public/data/$(findmonthyear.py bxacc.txt)
 
 if [ -e ${DIR} ]
     then
