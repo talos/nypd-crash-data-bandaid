@@ -1,0 +1,132 @@
+body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.2em;
+    color: #222;
+}
+
+a {
+    text-decoration: none;
+    color: #633;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+h1 {
+}
+
+h2 {
+}
+
+h3 {
+}
+
+ul {
+    list-style-type: square;
+}
+
+hr {
+    border: 0px;
+    height: 1px;
+    color: black;
+    background-color: black;
+    border: none;
+    width: 50%;
+}
+
+div#page {
+    width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: .5em 1.4em .5em 1.4em;
+    border-radius: 0em 0em 1em 1em;
+    border: solid black 0px 1px 1px 1px;
+    box-shadow: 5px 5px black;
+}
+
+div#header a {
+    color: #999;
+    font-size: 4em;
+    font-style: italic;
+    font-family: Georgia, Palatino, serif;
+}
+
+div#header strong {
+    font-weight: bold;
+}
+
+.pseudositer-index {
+    font-weight: 100;
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;
+}
+
+.pseudositer-index .pseudositer-link-selected {
+    display: inline-block !important;
+    font-weight: normal;
+    color: black;
+}
+
+.pseudositer-index-0 {
+    padding: 1em 0em 0em 0em;
+}
+
+.pseudositer-index-0 .pseudositer-link {
+    padding: .5em;
+}
+
+.pseudositer-index-0 .pseudositer-link-selected {
+    border-radius: .4em .4em 0em 0em;
+    box-shadow: 5px 5px black;
+}
+
+.pseudositer-index-1 {
+    font-size: 0.9em;
+    border-radius: 1em 0em 0em 1em;
+    padding: .7em 0em .7em 0em;
+}
+
+
+.pseudositer-index-1 .pseudositer-link {
+    padding: .4em .4em .4em 0em;
+    margin: 0em 0em 0em .7em;
+}
+
+.pseudositer-index-1 .pseudositer-link-selected {
+    border-radius: .4em 0em 0em .4em;
+    box-shadow: 5px 5px black;
+}
+
+.pseudositer-content {
+}
+
+.pseudositer-loading {
+    position: fixed;
+    left: 40%;
+    width: 20%;
+    top: 40%;
+    color: #222;
+    background-color: white;
+    opacity: 50%;
+    vertical-align: middle;
+    text-align: center;
+    border-radius: .5em;
+    border: 1px solid black;
+    padding: 1em;
+}
+
+.pseudositer-error {
+    position: fixed;
+    left: 40%;
+    width: 20%;
+    top: 40%;
+    background-color: #C33;
+    color: #EFE;
+    vertical-align: middle;
+    text-align: center;
+    border-radius: .5em;
+    border: 1px solid black;
+    padding: 1em;
+}
