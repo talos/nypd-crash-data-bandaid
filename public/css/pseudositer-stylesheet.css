@@ -35,12 +35,17 @@ hr {
     width: 50%;
 }
 
+img#bandaid {
+    vertical-align: middle;
+}
+
 div.icon {
     margin-top: 1em;
 }
 
 div.icon small {
     padding-right: 1em;
+    font-style: italic;
 }
 
 div.icon iframe {
