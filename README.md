@@ -47,7 +47,7 @@ And run the shell script:
     cd nypd-crash-data-bandaid/
     ./download.sh
 
-You will now be graced with a folder inside `data/`, named in the
+You will now be graced with a folder inside `public/data/`, named in the
 format `YYYYMM`, with borough-by-borough crash data as a CSV.
 
 If you have already downloaded the data currently on the site, the
@@ -74,7 +74,7 @@ OK, OK.  Go to:
 
 Historical data will be kept there, too.  Watch the [RSS feed][]!
 
-  [RSS feed]: http://nypd.openscrape.com/feed.xml
+  [RSS feed]: http://nypd.openscrape.com/data/feed.xml
 
 ## I wanna API! I wanna make mashups!
 
