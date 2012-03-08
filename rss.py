@@ -32,7 +32,7 @@ for the feed.  See sample-config.ini ."""
     sys.exit(1)
 
 URL = PARSER.get('settings', 'url')
-DATA_PATH = 'data'
+DATA_PATH = os.sep.join(['public', 'data'])
 
 rss = PyRSS2Gen.RSS2(
     title = "NYPD Crash Data Bandaid",
@@ -53,4 +53,4 @@ rss = PyRSS2Gen.RSS2(
        for data_dir in os.listdir( DATA_PATH )]
     )
 
-rss.write_xml(open("feed.xml", "w"))
+rss.write_xml(open(os.sep.join([DATA_PATH, "feed.xml"]), "w"))
