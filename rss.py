@@ -31,14 +31,15 @@ if not len(PARSER.read('config.ini')):
 for the feed.  See sample-config.ini ."""
     sys.exit(1)
 
-URL = PARSER.get('settings', 'url')
-DATA_PATH = os.sep.join(['public', 'data'])
+PRIVATE_DATA_PATH = 'public'
+PUBLIC_DATA_PATH = 'data'
+DATA_PATH = os.sep.join([PRIVATE_DATA_PATH, PUBLIC_DATA_PATH])
+URL = PARSER.get('settings', 'url') + '/' + PUBLIC_DATA_PATH
 
 rss = PyRSS2Gen.RSS2(
     title = "NYPD Crash Data Bandaid",
-    link = URL,
     description = "A CSV band-aid for the NYPD's crash data PDFs",
-
+    link = URL,
     lastBuildDate = datetime.now(),
 
     items = [
