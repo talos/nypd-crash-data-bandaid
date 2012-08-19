@@ -17,6 +17,8 @@ fi
 echo Grabbing data for ${DIR}
 
 # We don't have the data yet, grab the rest
+wget http://www.nyc.gov/html/nypd/downloads/pdf/traffic_data/cityacc.pdf
+
 wget http://www.nyc.gov/html/nypd/downloads/pdf/traffic_data/bkacc.pdf
 wget http://www.nyc.gov/html/nypd/downloads/pdf/traffic_data/mnacc.pdf
 wget http://www.nyc.gov/html/nypd/downloads/pdf/traffic_data/qnacc.pdf
