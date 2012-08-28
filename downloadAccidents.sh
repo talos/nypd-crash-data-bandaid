@@ -5,7 +5,7 @@ PATH=${PATH}:./
 # Test the waters.
 wget http://www.nyc.gov/html/nypd/downloads/pdf/traffic_data/bxacc.pdf
 pdftotext -layout bxacc.pdf
-DIR=public/data/accidents/$(findmonthyear.py bxacc.txt)
+DIR=public/data/$(findmonthyear.py bxacc.txt)/accidents/
 
 if [ -e ${DIR} ]
     then
@@ -29,17 +29,17 @@ pdftotext -layout mnacc.pdf
 pdftotext -layout qnacc.pdf
 pdftotext -layout siacc.pdf
 
-processAccidents.py bxacc.txt > bronx.csv
-processAccidents.py bkacc.txt > brooklyn.csv
-processAccidents.py mnacc.txt > manhattan.csv
-processAccidents.py qnacc.txt > queens.csv
-processAccidents.py siacc.txt > staten_island.csv
+./processAccidents.py ${DIR}/bxacc.txt > ${DIR}/bronx.csv
+./processAccidents.py ${DIR}/bkacc.txt > ${DIR}/brooklyn.csv
+./processAccidents.py ${DIR}/mnacc.txt > ${DIR}/manhattan.csv
+./processAccidents.py ${DIR}/qnacc.txt > ${DIR}/queens.csv
+./processAccidents.py ${DIR}/siacc.txt > ${DIR}/staten_island.csv
 
 # Everything in its proper place
 mkdir -p ${DIR}/raw
 
-mv *.csv ${DIR}
-mv *.txt ${DIR}/raw
-mv *.pdf ${DIR}/raw
+mv ${DIR}/*.csv ${DIR}
+mv ${DIR}/*.txt ${DIR}/raw
+mv ${DIR}/*.pdf ${DIR}/raw
 
 echo Finished grabbing data for ${DIR}
