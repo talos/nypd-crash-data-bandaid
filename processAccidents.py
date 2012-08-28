@@ -153,7 +153,7 @@ def parse_lines(lines):
 
 if len(sys.argv) != 2:
     print """
-usage: scrapeintersections.py [file]
+usage: processAccidents.py [file]
 """
     sys.exit(1)
 
