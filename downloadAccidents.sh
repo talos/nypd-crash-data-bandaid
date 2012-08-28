@@ -5,11 +5,11 @@ PATH=${PATH}:./
 # Test the waters.
 wget http://www.nyc.gov/html/nypd/downloads/pdf/traffic_data/bxacc.pdf
 pdftotext -layout bxacc.pdf
-DIR=public/data/$(findmonthyear.py bxacc.txt)
+DIR=public/data/accidents/$(findmonthyear.py bxacc.txt)
 
 if [ -e ${DIR} ]
     then
-    echo Already have data at ${DIR}
+    echo Already have accident data at ${DIR}
     rm bxacc*
     exit 0
 fi
