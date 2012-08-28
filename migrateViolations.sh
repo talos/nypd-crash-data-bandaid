@@ -32,7 +32,7 @@ PATH=${PATH}:./
 #        popd
 #    done
 
-for YEAR in {201107..201207}
+for YEAR in {201201..201207}
 do
     DIR=public/data/${YEAR}/violations
     RAW_DIR=${DIR}/raw
