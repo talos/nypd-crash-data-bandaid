@@ -12,6 +12,12 @@ if len(sys.argv) < 2:
     sys.stderr.write("should have been run through pdftotext.\n")
     sys.exit(1)
 
+def quote(s):
+    """
+    Wrap a string in double quotes.
+    """
+    return '"%s"' % s.replace('"', r'\"')
+
 # Read in each arg as a file name
 for path in sys.argv[1:]:
 
@@ -43,7 +49,7 @@ for path in sys.argv[1:]:
 
                 try:
                     # Try to write to stdout -- did we capture everything?
-                    sys.stdout.write(','.join([year, month, location, offense, ytd, mtd]))
+                    sys.stdout.write(','.join([quote(s) for s in (year, month, location, offense, ytd, mtd)]))
                     sys.stdout.write('\n')
                 except Exception as e:
                     sys.stderr.write("Unable to process '%s', aborting...\n" % path)
