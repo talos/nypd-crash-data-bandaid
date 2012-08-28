@@ -22,6 +22,9 @@
 import re
 import sys
 
+MONTH_RE = re.compile(r'(january|february|march|april|may|june|july|august|september|december)', flags=re.I)
+YEAR_RE = re.compile(r'\d{4}')
+
 def month2num(month):
     return {
         'jan': '01',
@@ -38,11 +41,11 @@ def month2num(month):
         'dec': '12'
         }[month.lower()[0:3]]
 
-def find_month_year(lines):
-    for line in lines:
-        match = re.search(r'(january|february|march|april|may|june|july|august|september|december)\s+(\d+)', line, flags=re.I)
-        if match:
-            return match.group(1), match.group(2)
+def find_month_year(line):
+    month = MONTH_RE.search(line)
+    year = YEAR_RE.search(line)
+    if month and year:
+        return month.group(0), year.group(0)
 
 if len(sys.argv) != 2:
     print """
@@ -50,12 +53,12 @@ usage: findmonthyear.py [file]
 """
     sys.exit(1)
 
-filename = sys.argv[1]
-
-f = open(filename)
-
-lines = f.readlines()
-month_year = find_month_year(lines)
+filename= sys.argv[1]
+with open(filename) as f:
+    for line in f:
+        month_year = find_month_year(line)
+        if month_year:
+            break
 
 if not month_year:
     sys.exit("Couldn't find month and year from %s" % filename)
