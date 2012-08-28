@@ -66,6 +66,10 @@ Thanks to Matthew Kime for suggesting the name.
 
 Thanks to [Streetsblog](http://www.streetsblog.org/) for being awesome.
 
+Thanks to [Transportation Alternatives](http://www.transalt.org/) for supplying
+missing older data, the raw violations files, and the full list of violations
+URLs.
+
 ## Just give me the data already!
 
 OK, OK.  Go to:
