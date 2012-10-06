@@ -5,7 +5,7 @@ PATH=${PATH}:./
 # Test the waters.
 wget http://www.nyc.gov/html/nypd/downloads/pdf/traffic_data/bxacc.pdf
 pdftotext -layout bxacc.pdf
-DIR=public/data/$(findmonthyear.py bxacc.txt)/accidents/
+DIR=public/data/$(findmonthyear.py bxacc.txt)/accidents
 
 if [ -e ${DIR} ]
     then
@@ -29,17 +29,17 @@ pdftotext -layout mnacc.pdf
 pdftotext -layout qnacc.pdf
 pdftotext -layout siacc.pdf
 
-./processAccidents.py ${DIR}/bxacc.txt > ${DIR}/bronx.csv
-./processAccidents.py ${DIR}/bkacc.txt > ${DIR}/brooklyn.csv
-./processAccidents.py ${DIR}/mnacc.txt > ${DIR}/manhattan.csv
-./processAccidents.py ${DIR}/qnacc.txt > ${DIR}/queens.csv
-./processAccidents.py ${DIR}/siacc.txt > ${DIR}/staten_island.csv
+python processAccidents.py bxacc.txt > bronx.csv
+python processAccidents.py bkacc.txt > brooklyn.csv
+python processAccidents.py mnacc.txt > manhattan.csv
+python processAccidents.py qnacc.txt > queens.csv
+python processAccidents.py siacc.txt > staten_island.csv
 
 # Everything in its proper place
 mkdir -p ${DIR}/raw
 
-mv ${DIR}/*.csv ${DIR}
-mv ${DIR}/*.txt ${DIR}/raw
-mv ${DIR}/*.pdf ${DIR}/raw
+mv *.csv ${DIR}
+mv *acc.txt ${DIR}/raw
+mv *acc.pdf ${DIR}/raw
 
 echo Finished grabbing data for ${DIR}

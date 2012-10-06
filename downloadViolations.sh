@@ -10,7 +10,7 @@ wget -q ${TEST_URL} -O ${TEST_FILE}.pdf
 pdftotext -layout ${TEST_FILE}.pdf
 ./processViolations.py ${TEST_FILE}.txt > ${TEST_FILE}.csv
 
-DIR=public/data/$(findmonthyear.py ${TEST_FILE}.csv)/violations/
+DIR=public/data/$(findmonthyear.py ${TEST_FILE}.csv)/violations
 
 rm -f ${TEST_FILE}*
 
@@ -40,4 +40,4 @@ do
 done
 popd
 
-./processViolations.py ${DIR}/raw/*.txt > ${DIR}/processed.csv
+python processViolations.py ${DIR}/raw/*.txt > ${DIR}/processed.csv

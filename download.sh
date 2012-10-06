@@ -1,4 +1,4 @@
 #!/bin/sh
 
-downloadAccidents.sh
-downloadViolations.sh
+./downloadAccidents.sh
+./downloadViolations.sh
