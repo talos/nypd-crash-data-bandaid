@@ -92,7 +92,7 @@ def parse_lines(lines):
 
         # pull out month & year if we haven't already.
         if not month_year:
-            match = re.search(r'(january|february|march|april|may|june|july|august|september|december)\s+(\d+)', line, flags=re.I)
+            match = re.search(r'(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d+)', line, flags=re.I)
             if match:
                 month_year = (match.group(1), match.group(2))
 
