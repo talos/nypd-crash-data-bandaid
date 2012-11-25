@@ -22,7 +22,7 @@
 import re
 import sys
 
-MONTH_RE = re.compile(r'(january|february|march|april|may|june|july|august|september|december)', flags=re.I)
+MONTH_RE = re.compile(r'(january|february|march|april|may|june|july|august|september|october|november|december)', flags=re.I)
 YEAR_RE = re.compile(r'\d{4}')
 
 def month2num(month):

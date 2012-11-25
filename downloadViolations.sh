@@ -6,8 +6,10 @@ VIOLATIONS_PDFS=violationsPDFs.txt
 # New report?
 TEST_URL=$(head -n 1 ${VIOLATIONS_PDFS})
 TEST_FILE="testViolations"
-wget -q ${TEST_URL} -O ${TEST_FILE}.pdf
+
+wget ${TEST_URL} -O ${TEST_FILE}.pdf
 pdftotext -layout ${TEST_FILE}.pdf
+
 ./processViolations.py ${TEST_FILE}.txt > ${TEST_FILE}.csv
 
 DIR=public/data/$(findmonthyear.py ${TEST_FILE}.csv)/violations
