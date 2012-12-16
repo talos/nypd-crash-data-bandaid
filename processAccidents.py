@@ -60,8 +60,6 @@ ACCIDENTS = 'accidents'
 ACCIDENTS_WITH_INJURIES = 'accidents_with_injuries'
 INVOLVED = 'involved'
 STREET_NAME = 'street_name'
-LON = 'lon'
-LAT = 'lat'
 BORO_NUM_TO_NAME = {
     '1': 'Manhattan',
     '2': 'Bronx',
@@ -72,8 +70,7 @@ BORO_NUM_TO_NAME = {
 
 HEADERS = [ YEAR, MONTH, PRECINCT, STREET_NAME, LON, LAT,
             ACCIDENTS_WITH_INJURIES, ACCIDENTS, INVOLVED,
-            CATEGORY, INJURED, KILLED, VEHICLE_TYPE, VEHICLE_COUNT,
-            LON, LAT ]
+            CATEGORY, INJURED, KILLED, VEHICLE_TYPE, VEHICLE_COUNT ]
 
 
 ### FUNCTIONS ###
