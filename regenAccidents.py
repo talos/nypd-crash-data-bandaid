@@ -12,15 +12,15 @@ PATH_TO_DATA = './public/data'
 def determine_boro_from_filename(filename):
     filename = filename.lower()
     if filename.startswith('mn'):
-        return 1
+        return (1, 'manhattan')
     elif filename.startswith('bx'):
-        return 2
+        return (2, 'bronx')
     elif filename.startswith('bk'):
-        return 3
+        return (3, 'brooklyn')
     elif filename.startswith('qn'):
-        return 4
+        return (4, 'queens')
     elif filename.startswith('si'):
-        return 5
+        return (5, 'staten_island')
     else:
         raise ValueError(u"Could not determine borough from filename {0}".format(
             filename))
@@ -32,11 +32,12 @@ for el in os.walk(PATH_TO_DATA):
         for filename in files:
             if filename.endswith('.txt'):
                 try:
-                    boro_num = determine_boro_from_filename(filename)
+                    boro_num, boro_name = determine_boro_from_filename(filename)
                 except ValueError as e:
                     sys.stderr.write(u"%s\n".format(e))
                     continue
                 path_to_file = os.path.join(path, filename)
                 sys.stderr.write(u"Processing {0}\n".format(path_to_file))
+                sys.stdout = open(os.path.join(path, '..', '{0}.csv'.format(boro_name)), 'w')
                 process_accidents(boro_num, path_to_file)
 
