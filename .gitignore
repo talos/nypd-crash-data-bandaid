@@ -3,3 +3,5 @@ feed.xml
 /public/data/*
 config.ini
 log.txt
+tmp/
+*.pyc

@@ -29,11 +29,11 @@ pdftotext -layout mnacc.pdf
 pdftotext -layout qnacc.pdf
 pdftotext -layout siacc.pdf
 
-python processAccidents.py bxacc.txt > bronx.csv
-python processAccidents.py bkacc.txt > brooklyn.csv
-python processAccidents.py mnacc.txt > manhattan.csv
-python processAccidents.py qnacc.txt > queens.csv
-python processAccidents.py siacc.txt > staten_island.csv
+python processAccidents.py 2 bxacc.txt > bronx.csv
+python processAccidents.py 3 bkacc.txt > brooklyn.csv
+python processAccidents.py 1 mnacc.txt > manhattan.csv
+python processAccidents.py 4 qnacc.txt > queens.csv
+python processAccidents.py 5 siacc.txt > staten_island.csv
 
 # Everything in its proper place
 mkdir -p ${DIR}/raw
