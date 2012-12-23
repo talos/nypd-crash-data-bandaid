@@ -10,7 +10,7 @@ from zipfile import ZipFile, ZIP_DEFLATED
 TMP_PATH = './tmp'
 try:
     os.mkdir(TMP_PATH)
-except IOError:
+except OSError:
     pass
 ALL_ACCIDENTS_NAME = 'all_accidents.csv'
 PATH_TO_DATA = './public/data'
