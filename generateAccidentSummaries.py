@@ -23,9 +23,11 @@ with open(PATH_TO_TMP_FILE, 'w') as tmp_accidents_file:
                     tmp_accidents_file.write(open(path_to_file).read())
                     sys.stdout.write(u"Adding {0} to {1}\n".format(path_to_file, PATH_TO_TMP_FILE))
 
-with ZipFile(PATH_TO_ALL_ACCIDENTS, 'w', ZIP_DEFLATED) as accident_archive:
-    accident_archive.write(PATH_TO_TMP_FILE, ALL_ACCIDENTS_NAME)
-    sys.stdout.write(u"Compressed {0} into {1}\n".format(PATH_TO_TMP_FILE,
-                                                         PATH_TO_ALL_ACCIDENTS))
+
+accident_archive = ZipFile(PATH_TO_ALL_ACCIDENTS, 'w', ZIP_DEFLATED)
+accident_archive.write(PATH_TO_TMP_FILE, ALL_ACCIDENTS_NAME)
+sys.stdout.write(u"Compressed {0} into {1}\n".format(PATH_TO_TMP_FILE,
+                                                     PATH_TO_ALL_ACCIDENTS))
+accident_archive.close()
 
 os.remove(PATH_TO_TMP_FILE)
