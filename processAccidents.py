@@ -155,7 +155,7 @@ def geocode_intersection(street1, street2, boro_num):
         resp = GEOCODER.geocode(u"{0} and {1}, {2}, NY".format(street1,
                                                                street2,
                                                                BORO_NUM_TO_NAME[str(boro_num)]))
-        time.sleep(2)
+        time.sleep(4)
         latlon = resp[1]
         lonlat = (str(latlon[1]), str(latlon[0]))
         write_intersections_lonlat_dict(INTERSECTIONS_LONLAT_PATH, boro_num,
