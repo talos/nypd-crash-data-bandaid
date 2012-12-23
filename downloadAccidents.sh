@@ -42,4 +42,7 @@ mv *.csv ${DIR}
 mv *acc.txt ${DIR}/raw
 mv *acc.pdf ${DIR}/raw
 
+# Generate summary files
+./generateAccidentSummaries.py
+
 echo Finished grabbing data for ${DIR}
