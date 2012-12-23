@@ -7,10 +7,15 @@ from zipfile import ZipFile, ZIP_DEFLATED
 
 # Generate summary file for all accidents
 
+TMP_PATH = './tmp'
+try:
+    os.mkdir(TMP_PATH)
+except IOError:
+    pass
 ALL_ACCIDENTS_NAME = 'all_accidents.csv'
 PATH_TO_DATA = './public/data'
 PATH_TO_ALL_ACCIDENTS = os.path.join(PATH_TO_DATA, ALL_ACCIDENTS_NAME + '.zip')
-PATH_TO_TMP_FILE = './tmp/' + ALL_ACCIDENTS_NAME
+PATH_TO_TMP_FILE = os.path.join(TMP_PATH, ALL_ACCIDENTS_NAME)
 
 with open(PATH_TO_TMP_FILE, 'w') as tmp_accidents_file:
     # Traverse the accidents data and re-process all text output.
