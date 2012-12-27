@@ -70,6 +70,9 @@ Thanks to [Transportation Alternatives](http://www.transalt.org/) for supplying
 missing older data, the raw violations files, and the full list of violations
 URLs.
 
+Thanks to Tom Swanson for his invaluable help in geocoding the vast majority of
+intersections.
+
 ## Just give me the data already!
 
 OK, OK.  Go to:
