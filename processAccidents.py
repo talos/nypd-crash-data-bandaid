@@ -199,8 +199,12 @@ def parse_lines(lines, boro_num, intersections_lonlat_dict):
         #we might at any time hit a header line of some sort. 
         if len(line) < 50:
             #probably a new precinct or a blank separator or other cruft
-            if "Precinct" in line:
+            if "Precinct" in line or "Mid Town South" in line or "Mid Town North" in line:
                 precinct = line.strip()
+                if "Mid Town South" in line:
+                    precinct = "14th Precinct"
+                elif "Mid Town North" in line:
+                    precinct = "18th Precinct"
                 if intersection is None:
                     intersection = make_intersection(precinct, month_year[0], month_year[1])
             continue
