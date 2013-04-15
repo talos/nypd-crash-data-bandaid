@@ -18,6 +18,7 @@ PATH_TO_ALL_ACCIDENTS = os.path.join(PATH_TO_DATA, ALL_ACCIDENTS_NAME + '.zip')
 PATH_TO_TMP_FILE = os.path.join(TMP_PATH, ALL_ACCIDENTS_NAME)
 
 with open(PATH_TO_TMP_FILE, 'w') as tmp_accidents_file:
+    needs_header = True
     # Traverse the accidents data and re-process all text output.
     for el in os.walk(PATH_TO_DATA):
         path, dirs, files = el
@@ -25,8 +26,15 @@ with open(PATH_TO_TMP_FILE, 'w') as tmp_accidents_file:
             for filename in files:
                 if filename.endswith('.csv'):
                     path_to_file = os.path.join(path, filename)
-                    tmp_accidents_file.write(open(path_to_file).read())
-                    sys.stdout.write(u"Adding {0} to {1}\n".format(path_to_file, PATH_TO_TMP_FILE))
+                    with open(path_to_file) as source_file:
+                        if needs_header:
+                            needs_header = False # Keep header row, set flag
+                        else:
+                            source_file.next() # Skip header row
+
+                        for line in source_file:
+                            tmp_accidents_file.write(line)
+                        sys.stdout.write(u"Adding {0} to {1}\n".format(path_to_file, PATH_TO_TMP_FILE))
 
 
 accident_archive = ZipFile(PATH_TO_ALL_ACCIDENTS, 'w', ZIP_DEFLATED)
