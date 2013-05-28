@@ -28,10 +28,11 @@
 import re
 import sys
 import time
+from pygeolib import GeocoderError
 
 try:
-    from geopy import geocoders
-    GEOCODER = geocoders.Google()
+    import pygeocoder
+    GEOCODER = pygeocoder.Geocoder
 except ImportError:
     sys.stderr.write(u"No geocoder available\n")
     GEOCODER = None
@@ -156,13 +157,13 @@ def geocode_intersection(street1, street2, boro_num):
                                                                street2,
                                                                BORO_NUM_TO_NAME[str(boro_num)]))
         time.sleep(4)
-        latlon = resp[1]
-        lonlat = (str(latlon[1]), str(latlon[0]))
+        latlon = (str(resp.latitude), str(resp.longitude), )
+        lonlat = (str(resp.longitude), str(resp.latitude), )
         write_intersections_lonlat_dict(INTERSECTIONS_LONLAT_PATH, boro_num,
                                         street1, street2, str(latlon[1]),
                                         str(latlon[0]))
         return lonlat
-    except ValueError as e:
+    except GeocoderError as e:
         write_intersections_lonlat_dict(INTERSECTIONS_LONLAT_PATH, boro_num,
                                         street1, street2, '', '')
         sys.stderr.write(u"{0} for {1} and {2}\n".format(e, street1, street2))
@@ -250,7 +251,11 @@ def parse_lines(lines, boro_num, intersections_lonlat_dict):
             street_name = street_name.strip()
             intersection[STREET_NAME] = street_name
 
-            street1, street2 = street_name.lower().split(' and ')
+            try:
+                street1, street2 = street_name.lower().split(' and ')
+            except ValueError as e:
+                sys.stderr.write(u"Invalid address, no ' and ': {0} ({1})\n".format(street_name, e))
+                continue
 
             lonlat = None
             unknown_lonlat = False
