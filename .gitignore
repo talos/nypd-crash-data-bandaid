@@ -5,3 +5,5 @@ config.ini
 log.txt
 tmp/
 *.pyc
+public/map/public/js
+public/map/node_modules

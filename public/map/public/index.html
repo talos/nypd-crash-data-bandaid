@@ -1,0 +1,45 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>Let's map!</title>
+        <link rel="stylesheet" href="css/leaflet.css" />
+        <link rel="stylesheet" href="css/letsmap.css" />
+        <link rel="stylesheet" href="css/MarkerCluster.css" />
+        <link rel="stylesheet" href="css/MarkerCluster.default.css" />
+
+        <script type="text/html" id="markerTemplate">
+        <div class="single-intersection">
+          <div><strong>{{month}} {{year}}</strong></div>
+          <div>
+            Accidents with injuries: {{accidentsWithInjuries}},
+            accidents: {{accidents}},
+            involved: {{involved}}.
+          </div>
+          <table>
+            <tr><th><th>Injured<th>Killed
+            {{#cyclists}}<tr><td>Cyclists<td>{{injured}}<td>{{killed}}{{/cyclists}}
+            {{#motorists}}<tr><td>motorists<td>{{injured}}<td>{{killed}}{{/motorists}}
+            {{#passengers}}<tr><td>passengers<td>{{injured}}<td>{{killed}}{{/passengers}}
+            {{#pedestr}}<tr><td>pedestr<td>{{injured}}<td>{{killed}}{{/pedestr}}
+            {{#total}}<tr><td>total<td>{{injured}}<td>{{killed}}{{/total}}
+          </table>
+          <div>
+            {{#other}}
+            {{vehicle_count}} {{vehicle_type}}, 
+            {{/other}}
+          </div>
+        </div>
+        </script>
+    </head>
+
+    <body>
+        <script type="text/javascript" src="js/lib/leaflet-src.js"></script>
+        <script type="text/javascript" src="js/lib/leaflet.markercluster-src.js"></script>
+        <script type="text/javascript" src="js/lib/tile.stamen.js"></script>
+        <script type="text/javascript" src="js/lib/mustache.js"></script>
+        <script type="text/javascript" src="js/lib/jquery-1.10.1.min.js"></script>
+        <script type="text/javascript" src="js/lib/underscore-min.js"></script>
+        <script type="text/javascript" src="js/lib/backbone-min.js"></script>
+        <script type="text/javascript" src="js/letsmap.js"></script>
+    </body>
+</html>
