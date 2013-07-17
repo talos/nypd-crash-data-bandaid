@@ -54,7 +54,20 @@ a:active {
     color: red;
 }
 
-#app #map {
+#app .ideograph {
+    max-height: 20px;
+    max-width: 20px;
+}
+
+#app #map * .popup .data {
+    text-align: center;
+}
+
+#app #map * .popup .data table {
+    display: inline-block;
+    border: 1px solid black;
+    padding: 5px;
+    margin: 0 10px 0 10px;
 }
 
 #app #map #mapHolder {
@@ -78,212 +91,112 @@ a:active {
 }
     */
 
-#app #map #mapHolder .venue-marker {
-    font-size: 36px;
-    text-shadow: 1px 0px 0px black, -1px 0px 0px black, 0px 1px 0px black, 0px -1px 0px black, 2px 2px 0px red, 4px 4px 0px black, 4px 2px 0px black, 2px 4px 0px black;
-    font-weight: 300;
-    font-family: sans-serif;
-    color: white;
-    cursor: default !important;
+#app #map #mapHolder .intersection-marker.aggregate div {
+    border-radius: 100px;
 }
 
-#app #map #mapHolder .venue-marker:hover {
-    /* Animations bake the CPU */
-    /*-moz-animation-name: throb-moz;
-    -moz-animation-duration: 1s;
-    -moz-animation-iteration-count: infinite;
-    -webkit-animation-name: throb-webkit;
-    -webkit-animation-duration: 1s;
-    -webkit-animation-iteration-count: infinite;*/
+#app #map #mapHolder .intersection-marker.single div {
+    border-radius: 100px;
+    border: 1px solid black;
+    box-shadow: 2px 2px 2px black;
 }
 
-#app #map .slider {
+#app #map #mapHolder .intersection-marker div {
+    width: 10px;
+    height: 10px;
+    margin-left: -6px;
+    margin-top: -6px;
+}
+
+/*
+#app #map #mapHolder .intersection-marker div.good {
+    background-color: #3c6;
+    border: 2px solid #cfd;
+    color: #bfc;
+    background-color: #bfc;
+}
+
+#app #map #mapHolder .intersection-marker div.medium {
+    background-color: #ffb333;
+    border: 1px solid #ff9;
+    color: #fc9;
+    background-color: #fc9;
+}
+
+#app #map #mapHolder .intersection-marker div.bad {
+    background-color: #f36;
+    border: 1px solid #f96;
+    color: #f60;
+    background-color: #f60;
+}
+*/
+
+/*
+#app #map #mapHolder .intersection-marker div.single {
+    width: 8px;
+    height: 8px;
+    margin-left: -5px;
+    margin-top: -5px;
+    box-shadow: 0px 0px 2px 3px;
+}
+
+#app #map #mapHolder .intersection-marker div.several {
+    width: 12px;
+    height: 12px;
+    margin-left: -7px;
+    margin-top: -7px;
+    box-shadow: 0px 0px 4px 3px;
+}
+
+#app #map #mapHolder .intersection-marker div.many {
+    width: 18px;
+    height: 18px;
+    margin-left: -10px;
+    margin-top: -10px;
+    box-shadow: 0px 0px 3px 2px;
+}
+    */
+
+#app #map #mapHolder .intersection-marker div:hover {
+    color: black !important;
+    background-color: white !important;
+}
+
+#app #map #slider {
     position: absolute;
     bottom: 40px;
     z-index: 100;
     left: 100px;
-    right: 10%;
-    height: 20px;
-    background: rgba(255, 255, 255, 0.9);
-    box-shadow: 4px 4px 0px red;
-    -o-box-shadow: 4px 4px 0px red;
-    -moz-box-shadow: 4px 4px 0px red;
-    -webkit-box-shadow: 4px 4px 0px red;
-    border: 1px solid black;
-    border-radius: 10px;
-    -o-border-radius: 10px;
-    -moz-border-radius: 10px;
-    -webkit-border-radius: 10px;
+    right: 100px;
+    height: 10px;
 }
 
-#app #map .slider .blips {
+#app #map #progressbar {
     position: absolute;
-    left: 0px;
-    top: 0px;
-    width: 100%;
-    height: 100%;
-}
-
-#app #map .slider .blips .blip {
-    position: relative;
-    height: 1px;
-    background: black;
-}
-
-#app #map .slider .marker {
-    position: relative;
-    left: -2px;
-    top: -15px;
-    cursor: pointer;
-    border: 1px solid black;
-    background: white;
-    z-index: 101;
-    display: inline-block;
-    padding: 12px 5px;
-    text-align: center;
-    font-weight: bold;
-    border-radius: 40px;
-    -o-border-radius: 40px;
-    -moz-border-radius: 40px;
-    -webkit-border-radius: 40px;
-    box-shadow: 0px 0px 10px red;
-    -o-box-shadow: 0px 0px 10px red;
-    /*
-    -moz-animation-name: pulse;
-    -moz-animation-duration: 1s;
-    -moz-animation-iteration-count: infinite;
-    -webkit-animation-name: pulse;
-    -webkit-animation-duration: 1s;
-    -webkit-animation-iteration-count: infinite;*/
-}
-
-/*
-@-moz-keyframes pulse {
-    from { -moz-box-shadow: 0 0 5px red; }
-    50% { -moz-box-shadow: 0 0 30px red; }
-    to { -moz-box-shadow: 0 0 5px red; }
-}
-
-@-webkit-keyframes pulse {
-    from { -webkit-box-shadow: 0 0 5px red; }
-    50% { -webkit-box-shadow: 0 0 30px red; }
-    to { -webkit-box-shadow: 0 0 5px red; }
-}
-    */
-
-#app #map .slider .marker:hover {
-    box-shadow: 0px 0px 20px red;
-    -o-box-shadow: 0px 0px 20px red;
-    -moz-box-shadow: 0px 0px 20px red;
-    -webkit-box-shadow: 0px 0px 20px red;
-    border-color: red;
-}
-
-#app #infoBox {
-    color: white;
-    position: absolute;
-    bottom: 180px;
-    z-index: 102;
-    height: 0px; /* avoid messing with map. */
-    margin: 0 1em;
-}
-
-#app #infoBox .description {
-    color: white;
-    font-weight: bold;
-    text-shadow: -2px 0px 0px black, 2px 0px 0px black, 0px 1px 0px black, 0px -1px 0px black, 2px 2px 2px black;
-    position: relative;
-    top: -8px;
+    top: 40%;
+    height: 40px;
     left: 100px;
+    right: 100px;
+    z-index: 100;
 }
 
-#app #infoBox .description a {
-    color: red;
-}
-
-#app #infoBox .description a:hover {
-    color: white;
-}
-
-#app #infoBox .tagline {
-    font-family: "Brush Script MT", cursive;
-    font-weight: 500;
-    font-size: 72px;
-    text-shadow: 2px 0px 0px black, -2px 0px 0px black, 0px 2px 0px black, 0px -2px 0px black, 4px 4px 0px red, 6px 6px 0px black, 6px 4px 0px black, 4px 6px 0px black;
-}
-
-#app * .title {
-    color: white;
-    font-size: 24px;
-    font-weight: bold;
-    text-shadow: -2px 0px 0px black, 2px 0px 0px black, 0px 1px 0px black, 0px -1px 0px black, 2px 2px 2px black;
+#app #map #title {
+    position: absolute;
+    width: 100%;
     text-align: center;
+    font-size: 24px;
+    z-index: 100;
+    bottom: 10px;
+    color: #222;
+    font-family: helvetica neue, helvetica;
+    font-weight: 600;
+    text-shadow: 0px 0px 10px white;
 }
 
-/** Patching leaflet **/
-.leaflet-popup-content-wrapper {
-    box-shadow: none !important;
-    -o-box-shadow: none !important;
-    -webkit-box-shadow: none !important;
-    -moz-box-shadow: none !important;
-    border: none !important;
-    padding: 0 !important;
-    background: transparent !important;
+#app #map .dimension-control a {
+    padding: 5px;
 }
 
-.leaflet-popup-content {
-    margin: 0 !important;
-}
-
-.leaflet-popup-tip-container {
-    display: none;
-}
-
-.leaflet-control-zoom {
-    border-radius: 0px;
-    -o-border-radius: 0px;
-    -moz-border-radius: 0px;
-    -webkit-border-radius: 0px;
-    background: white;
-    border: 1px solid black;
-    box-shadow: 2px 2px 0px black;
-}
-
-.leaflet-control-zoom a {
-    border-radius: 10px;
-    -o-border-radius: 10px;
-    -moz-border-radius: 10px;
-    -webkit-border-radius: 10px;
-    border: 1px solid black;
-    background-color: white;
-}
-
-.leaflet-control-zoom a:hover {
-    border-color: red;
-}
-
-/* shift the layer control to the left side next to the zoom */
-.leaflet-right {
-    left: 50px;
-    right: inherit;
-}
-
-.leaflet-control-layers {
-    border-radius: 0px;
-    -o-border-radius: 0px;
-    -moz-border-radius: 0px;
-    -webkit-border-radius: 0px;
-    background-color: rgba(255, 255, 255, 0.9);
-    border: 1px solid black;
-    box-shadow: 2px 2px 0px black;
-}
-
-.leaflet-control-layers-expanded {
-    font-size: 16px;
-    color: black;
-}
-
-.single-intersection {
-    background: white;
-    border: 1px solid black;
+#app #map .dimension-control a.selected {
+    background: red;
 }

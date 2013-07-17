@@ -36,12 +36,8 @@ def run():
 
     # first pass -- create data_by_lonlat dict with lonlat keys, and subdatum
     # dicts
-    #data_by_xyz = {}
     data_by_lonlat = {}
     times = set()
-    #avg_x_by_z = {}
-    #avg_y_by_z = {}
-    #cnt_by_z = {}
     with open(os.path.join(PATH_TO_DATA, ALL_ACCIDENTS_NAME)) as all_accidents:
         for line in csv.reader(all_accidents, delimiter=','):
             year, month, precinct, street_name, lon, lat, accidents_with_injuries, accidents, involved, category, injured, killed, vehicle_type, vehicle_count = line
@@ -58,51 +54,33 @@ def run():
             times.add(time)
             len_times = len(times)
 
-            #for z in xrange(3, 6): # 14 is lossless
-            #for z in [3, 5, 14]:
-            #for z in [3, 4, 5, 6, 14]:
             for z in [14]:
-                #x = int((float(lon) + 74.266891) * pow(10, z / 2.0))
-                #y = int((float(lat) - 40.492825) * pow(10, z / 2.0))
-                #avg_x = avg_x_by_z.get(z, 0.0)
-                #avg_y = avg_y_by_z.get(z, 0.0)
-                #cnt_by_z[z] = cnt_by_z.get(z, 0) + 1
-                #cnt = cnt_by_z[z]
-                #avg_x_by_z[z] = (x + (avg_x * (cnt - 1))) / cnt
-                #avg_y_by_z[z] = (y + (avg_y * (cnt - 1))) / cnt
 
-                # skip out-of-bounds points
-                #if x < 0 or y < 0:
-                #    continue
-
-                #xyz = (x, y, z)
                 lonlat = (lon, lat)
-                #datum = data_by_xyz.get(xyz, None)
                 datum = data_by_lonlat.get(lonlat, None)
 
                 # Signal proper skip if nonexistent data for lonlat
                 if datum is None:
                     if len_times == 1:
-                        datum = [blank_subdatum()]
+                        datum = [street_name, blank_subdatum()]
                     else:
-                        datum = [len_times, blank_subdatum()]
+                        datum = [street_name, len_times - 1, blank_subdatum()]
                     #data_by_xyz[xyz] = datum
                     data_by_lonlat[lonlat] = datum
 
                 # Add skip if there was missing data in interim, then create a
                 # subdatum or grab the last subdatum
-                len_datum = len(datum)
+                #len_datum = len(datum)
+                len_datum = sum(map(lambda d: 1 if isinstance(d, dict) else d, datum[1:]))
                 datum_len_diff = len_times - len_datum
-                if datum_len_diff > 0:
-                    datum.append(datum_len_diff)
+                if datum_len_diff > 1:
+                    datum.append(datum_len_diff - 1)
                     datum.append(blank_subdatum())
-                else:
-                    subdatum = datum[-1]
+                elif datum_len_diff == 1:
+                    datum.append(blank_subdatum())
 
-                # provide addition for zoomed-out points not yet touched
-                #xyzs = subdatum['xyzs']
-                #if xyz not in xyzs:
-                #    xyzs.add(xyz)
+                subdatum = datum[-1]
+
                 subdatum['accidents_with_injuries'] = int(accidents_with_injuries)
                 subdatum['accidents'] = int(accidents)
                 subdatum['involved'] = int(involved)
@@ -175,6 +153,7 @@ def run():
     data_list = []
     for lonlat, datum in data_by_lonlat.iteritems():
         lon, lat = lonlat
+        street_name = datum.pop(0)
         # convert hash subdatum to list
         for i, subdatum in enumerate(datum):
             if type(subdatum) == dict:
@@ -192,6 +171,7 @@ def run():
 
         datum.insert(0, lon)
         datum.insert(0, lat)
+        datum.insert(0, street_name)
         data_list.append(datum)
 
     json.dump(data_list, open(os.path.join(PATH_TO_DATA, JSON_OUT_NAME), 'w'),

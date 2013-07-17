@@ -38,20 +38,17 @@ LetsMap.AppRouter = Backbone.Router.extend({
             this.route(route[0], route[1]);
         }, this));
 
-        // LoD violation
-        // whenever there's a click or movement on the map, bring us there.
-        this.view.map.on('changeview click', function () {
-            var view = this.view.map.getView();
-            this.navigate('map/' + view.year + '/' + view.month + '/' + view.zoom + '/' + view.lat + '/' + view.lng, {
-                trigger: true
-            });
+        this.view.map.on('changeview', function (year, month, zoom, lat, lng) {
+            this.navigate('map/' + year + '/' + (month + 1) + '/' + zoom + '/' + lat + '/' + lng);
         }, this);
     },
 
     map: function (year, month, zoom, lat, lng) {
         this.view.about.$el.hide();
         if (year && month && zoom && lat && lng) {
-            this.view.map.goTo(year, month, zoom, lat, lng);
+            this.view.map.render(year, month - 1, zoom, lat, lng);
+        } else {
+            this.view.map.render(2011, 11, 9, 40.70432661161239, -73.87447357177733);
         }
     },
 

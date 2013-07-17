@@ -49,10 +49,14 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 		this._nonPointGroup.on(L.FeatureGroup.EVENTS, this._propagateEvent, this);
 
 		this._inZoomAnimation = 0;
-		this._needsClustering = [];
-		this._needsRemoving = []; //Markers removed while we aren't on the map need to be kept track of
+		//this._needsClustering = [];
+		//this._needsRemoving = []; //Markers removed while we aren't on the map need to be kept track of
+		this._needsClustering = {};
+		this._needsRemoving = {};
 		//The bounds of the currently shown area (from _getExpandedVisibleBounds) Updated on zoom/move
 		this._currentShownBounds = null;
+
+		this._deferredLayersToAdd = [];
 	},
 
 	addLayer: function (layer) {
@@ -72,7 +76,11 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 		}
 
 		if (!this._map) {
-			this._needsClustering.push(layer);
+			if (!layer._markerClusterId) {
+				layer._markerClusterId = this._generateLayerId();
+			}
+			this._needsClustering[layer._markerClusterId] = layer;
+			//this._needsClustering.push(layer);
 			return this;
 		}
 
@@ -117,8 +125,11 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 		}
 
 		if (!this._map) {
-			if (!this._arraySplice(this._needsClustering, layer) && this.hasLayer(layer)) {
-				this._needsRemoving.push(layer);
+			//if (!this._arraySplice(this._needsClustering, layer) && this.hasLayer(layer)) {
+			if (layer._markerClusterId in this._needsClustering) {
+				delete this._needsClustering[layer._markerClusterId];
+			} else if (this.hasLayer(layer)) {
+				this._needsRemoving[layer._markerClusterId] = layer;
 			}
 			return this;
 		}
@@ -146,82 +157,55 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 	},
 
 	//Takes an array of markers and adds them in bulk
-	//If 'callback' is passed, then layers will be added in a deferred fashion,
-	//with 'callback' being called when the process is done.
-	//If 'progressCallback' is passed, then it will be called after each add
-	addLayers: function (layersArray, callback, progressCallback) {
+	addLayers: function (layersArray) {
 		var i, l, m,
 			onMap = this._map,
 			fg = this._featureGroup,
-			npg = this._nonPointGroup,
-			self = this,
-			delay = delay || 0,
-			layersAdded = 0,
-			numLayers = layersArray.length,
-			whenAdded = function () {
-				for (i = 0, l = layersArray.length; i < l; i++) {
-					m = layersArray[i];
-					//If we just made a cluster of size 2 then we need to remove the other marker from the map (if it is) or we never will
-					if (m.__parent) {
-						if (m.__parent.getChildCount() === 2) {
-							var markers = m.__parent.getAllChildMarkers(),
-								otherMarker = markers[0] === m ? markers[1] : markers[0];
-							fg.removeLayer(otherMarker);
-						}
-					}
-				}
-
-				if (onMap) {
-					//Update the icons of all those visible clusters that were affected
-					fg.eachLayer(function (c) {
-						if (c instanceof L.MarkerCluster && c._iconNeedsUpdate) {
-							c._updateIcon();
-						}
-					});
-
-					self._topClusterLevel._recursivelyAddChildrenToMap(null, self._zoom, self._currentShownBounds);
-				}
-				if (callback) {
-					callback();
-				}
-			},
-			addLayer = function (m) {
-				return function () {
-					layersAdded++;
-
-					//Not point data, can't be clustered
-					if (!m.getLatLng) {
-						npg.addLayer(m);
-						return;
-					}
-
-					if (self.hasLayer(m)) {
-						return;
-					}
-
-					if (!onMap) {
-						self._needsClustering.push(m);
-						return;
-					}
-
-					self._addLayer(m, self._maxZoom);
-
-					if (progressCallback) {
-						progressCallback(layersAdded, numLayers);
-					}
-
-					if (layersAdded === numLayers) {
-						whenAdded();
-					}
-				};
-			};
+			npg = this._nonPointGroup;
 
 		for (i = 0, l = layersArray.length; i < l; i++) {
-			if (callback) {
-				setTimeout(addLayer(layersArray[i]), 1);
-			} else {
-				addLayer(layersArray[i])();
+			m = layersArray[i];
+
+			//Not point data, can't be clustered
+			if (!m.getLatLng) {
+				npg.addLayer(m);
+				continue;
 			}
+
+			if (this.hasLayer(m)) {
+				continue;
+			}
+
+			if (!onMap) {
+				//this._needsClustering.push(m);
+				if (!m._markerClusterId) {
+					m._markerClusterId = this._generateLayerId();
+				}
+				this._needsClustering[m._markerClusterId] = m;
+				continue;
+			}
+
+			this._addLayer(m, this._maxZoom);
+
+			//If we just made a cluster of size 2 then we need to remove the other marker from the map (if it is) or we never will
+			if (m.__parent) {
+				if (m.__parent.getChildCount() === 2) {
+					var markers = m.__parent.getAllChildMarkers(),
+						otherMarker = markers[0] === m ? markers[1] : markers[0];
+					fg.removeLayer(otherMarker);
+				}
+			}
+		}
+
+		if (onMap) {
+			//Update the icons of all those visible clusters that were affected
+			fg.eachLayer(function (c) {
+				if (c instanceof L.MarkerCluster && c._iconNeedsUpdate) {
+					c._updateIcon();
+				}
+			});
+
+			this._topClusterLevel._recursivelyAddChildrenToMap(null, this._zoom, this._currentShownBounds);
 		}
 
 		return this;
@@ -236,7 +220,8 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 		if (!this._map) {
 			for (i = 0, l = layersArray.length; i < l; i++) {
 				m = layersArray[i];
-				this._arraySplice(this._needsClustering, m);
+				//this._arraySplice(this._needsClustering, m);
+				delete this._needsClustering[m._markerClusterId];
 				npg.removeLayer(m);
 			}
 			return this;
@@ -278,7 +263,8 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 
 		//If we aren't on the map (yet), blow away the markers we know of
 		if (!this._map) {
-			this._needsClustering = [];
+			//this._needsClustering = [];
+			this._needsClustering = {};
 			delete this._gridClusters;
 			delete this._gridUnclustered;
 		}
@@ -309,8 +295,13 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 		if (this._topClusterLevel) {
 			bounds.extend(this._topClusterLevel._bounds);
 		} else {
-			for (var i = this._needsClustering.length - 1; i >= 0; i--) {
-				bounds.extend(this._needsClustering[i].getLatLng());
+			//for (var i = this._needsClustering.length - 1; i >= 0; i--) {
+			//	bounds.extend(this._needsClustering[i].getLatLng());
+			//}
+			for (var id in this._needsClustering) {
+				if (this._needsClustering.hasOwnProperty(id)) {
+					bounds.extend(this._needsClustering[id].getLatLng());
+				}
 			}
 		}
 
@@ -325,8 +316,15 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 
 	//Overrides LayerGroup.eachLayer
 	eachLayer: function (method, context) {
-		var markers = this._needsClustering.slice(),
+		//var markers = this._needsClustering.slice(),
+		var markers = [],
 		    i;
+
+		for (var id in this._needsClustering) {
+			if (this._needsClustering.hasOwnProperty(id)) {
+				markers.push(this._needsClustering[id]);
+			}
+		}
 
 		if (this._topClusterLevel) {
 			this._topClusterLevel.getAllChildMarkers(markers);
@@ -345,19 +343,27 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 			return false;
 		}
 
-		var i, anArray = this._needsClustering;
+		/*var i, anArray = this._needsClustering;
 
 		for (i = anArray.length - 1; i >= 0; i--) {
 			if (anArray[i] === layer) {
 				return true;
 			}
+		}*/
+
+		if (layer._markerClusterId in this._needsClustering) {
+			return true;
 		}
 
-		anArray = this._needsRemoving;
+		/*anArray = this._needsRemoving;
 		for (i = anArray.length - 1; i >= 0; i--) {
 			if (anArray[i] === layer) {
 				return false;
 			}
+		}*/
+
+		if (layer._markerClusterId in this._needsRemoving) {
+			return false;
 		}
 
 		return !!(layer.__parent && layer.__parent._group === this) || this._nonPointGroup.hasLayer(layer);
@@ -404,7 +410,9 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 	//Overrides FeatureGroup.onAdd
 	onAdd: function (map) {
 		this._map = map;
-		var i, l, layer;
+		//var i, l, layer;
+		var id, layer;
+		var self = this;
 
 		if (!isFinite(this._map.getMaxZoom())) {
 			throw "Map has no maxZoom specified";
@@ -417,48 +425,59 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 			this._generateInitialClusters();
 		}
 
-		for (i = 0, l = this._needsRemoving.length; i < l; i++) {
-			layer = this._needsRemoving[i];
-			this._removeLayer(layer);
+		//for (i = 0, l = this._needsRemoving.length; i < l; i++) {
+		for (id in this._needsRemoving) {
+			if (this._needsRemoving.hasOwnProperty(id)) {
+				layer = this._needsRemoving[id];
+				this._removeLayer(layer);
+			}
 		}
-		this._needsRemoving = [];
+		//this._needsRemoving = [];
+		this._needsRemoving = {};
 
-		for (i = 0, l = this._needsClustering.length; i < l; i++) {
-			layer = this._needsClustering[i];
+		//for (i = 0, l = this._needsClustering.length; i < l; i++) {
+		for (id in this._needsClustering) {
+			if (this._needsClustering.hasOwnProperty(id)) {
+				layer = this._needsClustering[id];
 
-			//If the layer doesn't have a getLatLng then we can't cluster it, so add it to our child featureGroup
-			if (!layer.getLatLng) {
-				this._featureGroup.addLayer(layer);
-				continue;
+				//If the layer doesn't have a getLatLng then we can't cluster it, so add it to our child featureGroup
+				if (!layer.getLatLng) {
+					this._featureGroup.addLayer(layer);
+					continue;
+				}
+
+
+				if (layer.__parent) {
+					continue;
+				}
+				this._addLayer(layer, this._maxZoom, true);
+			}
+		}
+		this._addAllDeferredLayers(function () {
+
+			//this._needsClustering = [];
+			self._needsClustering = {};
+
+
+			self._map.on('zoomend', self._zoomEnd, self);
+			self._map.on('moveend', self._moveEnd, self);
+
+			if (self._spiderfierOnAdd) { //TODO FIXME: Not sure how to have spiderfier add something on here nicely
+				self._spiderfierOnAdd();
 			}
 
-
-			if (layer.__parent) {
-				continue;
-			}
-			this._addLayer(layer, this._maxZoom);
-		}
-		this._needsClustering = [];
+			self._bindEvents();
 
 
-		this._map.on('zoomend', this._zoomEnd, this);
-		this._map.on('moveend', this._moveEnd, this);
+			//Actually add our markers to the map:
 
-		if (this._spiderfierOnAdd) { //TODO FIXME: Not sure how to have spiderfier add something on here nicely
-			this._spiderfierOnAdd();
-		}
+			//Remember the current zoom level and bounds
+			self._zoom = self._map.getZoom();
+			self._currentShownBounds = self._getExpandedVisibleBounds();
 
-		this._bindEvents();
-
-
-		//Actually add our markers to the map:
-
-		//Remember the current zoom level and bounds
-		this._zoom = this._map.getZoom();
-		this._currentShownBounds = this._getExpandedVisibleBounds();
-
-		//Make things appear on the map
-		this._topClusterLevel._recursivelyAddChildrenToMap(null, this._zoom, this._currentShownBounds);
+			//Make things appear on the map
+			self._topClusterLevel._recursivelyAddChildrenToMap(null, self._zoom, self._currentShownBounds);
+		});
 	},
 
 	//Overrides FeatureGroup.onRemove
@@ -707,8 +726,36 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 		this._topClusterLevel = new L.MarkerCluster(this, -1);
 	},
 
+	// Add layers that were deferred in _addLayer
+	_addAllDeferredLayers: function (callback) {
+		this._addDeferredLayers(0, 300, this._deferredLayersToAdd.length, callback);
+	},
+
+	_addDeferredLayers: function (start, step, max, callback) {
+		var self = this,
+			stop = step + start > max ? max : step + start;
+		for (var i = start; i < stop; i++) {
+			this._addLayer.apply(this, this._deferredLayersToAdd[i]);
+		}
+		this.fire('addinglayers', {added: stop, total: max});
+		if (stop === max) {
+			this._deferredLayersToAdd = [];
+			callback();
+			this.fire('addedlayers');
+		} else {
+			setTimeout(function () {
+				self._addDeferredLayers(start + step, step, max, callback);
+			}, 1);
+		}
+	},
+
 	//Zoom: Zoom to start adding at (Pass this._maxZoom to start at the bottom)
-	_addLayer: function (layer, zoom) {
+	_addLayer: function (layer, zoom, defer) {
+		if (defer === true) {
+			this._deferredLayersToAdd.push([layer, zoom]);
+			return;
+		}
+
 		var gridClusters = this._gridClusters,
 		    gridUnclustered = this._gridUnclustered,
 		    markerPoint, z;
@@ -999,6 +1046,15 @@ L.MarkerClusterGroup.include(!L.DomUtil.TRANSITION ? {
 		//Could loop all this._layers and do this for each _icon if it stops working
 
 		L.Util.falseFn(document.body.offsetWidth);
+	},
+
+	_generateLayerId: function () {
+		if (L.markerClusterGroup.lastLayerId === undefined) {
+			L.markerClusterGroup.lastLayerId = 1;
+		} else {
+			L.markerClusterGroup.lastLayerId += 1;
+		}
+		return L.markerClusterGroup.lastLayerId;
 	}
 });
 

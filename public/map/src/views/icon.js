@@ -28,19 +28,49 @@
  */
 LetsMap.Icon = L.DivIcon.extend({
     options: {
-        iconUrl: null,
-        shadowUrl: null,
-        iconAnchor: new L.Point(18, 36),
-        className: 'venue-marker'
+        iconSize: new L.Point(0, 0),
+        className: 'intersection-marker'
     },
 
+    ratioMap: _.map(_.range(0, 8), function (v) { return "size" + v; }),
+
     /**
-     * Override createIcon to set text.
+     * Override createIcon.
      */
     createIcon: function () {
+        var div,
+            $div,
+            $slider = this.options.$slider,
+            marker = this.options.marker,
+            popup,
+            self = this;
+            //template = this._template.html();
+
         // call parent method explicitly
-        var div = L.DivIcon.prototype.createIcon.call(this);
-        div.innerHTML = '&#9834;';
+        div = L.DivIcon.prototype.createIcon.call(this);
+        $div = $(div);
+
+        if (this.options.aggregate === true) {
+            $div.addClass('aggregate');
+        } else {
+            $div.addClass('single');
+        }
+
+        this.$subDiv = $('<div />').appendTo($div.data('letsmap', {
+            data: this.options.data,
+            count: this.options.count
+        }));
+
+        // create popup and bind mouseover
+        popup = this.popup = new L.Popup({
+            data: this.options.data,
+            streetName: this.options.streetName,
+            count: this.options.count,
+            aggregate: this.options.aggregate
+        });
+
+        marker.bindPopup(this.popup);
+
         return div;
     }
 });

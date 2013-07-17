@@ -30,36 +30,26 @@
 LetsMap.Marker = L.Marker.extend({
 
     options: {
-        icon: new LetsMap.Icon(),
-        clickable: false
     },
-
-    _template: $('#markerTemplate'),
 
     /**
      * @param {Object} data
      * @this {L.Marker}
      */
-    initialize: function (data, slider) {
-        this._latlng = new L.LatLng(data[0], data[1]);
-        this._slider = slider;
-        this._data = this._processData(data.slice(2));
+    initialize: function (data, $slider) {
+        this._data = this._processData(data.slice(3));
+        var streetName = data[0];
+        var latlng = new L.LatLng(data[1], data[2]);
 
-        // bind a popup
-        this.popup = new L.Popup({
-            closeButton: false,
-            offset: new L.Point(0, 55)
+        L.Marker.prototype.initialize.call(this, latlng);
+        this.options.icon = new LetsMap.Icon({
+            data: this._data,
+            streetName: streetName,
+            marker: this,
+            count: 1,
+            $slider: $slider,
+            latlng: latlng
         });
-        this.popup.setLatLng(this._latlng);
-    },
-
-    /**
-     * @param {Number} idx The index for which to get the weight of this
-     * marker.
-     * @this {L.Marker}
-     */
-    getWeight: function (idx) {
-        return _.pluck(this._data, 'accidents');
     },
 
     /**
@@ -70,7 +60,7 @@ LetsMap.Marker = L.Marker.extend({
      */
     _processData: function (data) {
         var processedData = [],
-            categories = ['cyclists', 'motorists', 'passengers', 'pdestr',
+            categories = ['cyclists', 'motorists', 'passengers', 'pedestr',
                 'total'],
             i,
             j,
@@ -96,12 +86,16 @@ LetsMap.Marker = L.Marker.extend({
                 pd.accidentsWithInjuries = d[0];
                 pd.accidents = d[1];
                 pd.involved = d[2];
+                // Main categories, injured/killed counts
                 for (j = 3; j < 8; j += 1) {
-                    pd[categories[j - 2]] = {
-                        injured: d[j][0],
-                        killed: d[j][1]
-                    };
+                    if (d[j][0] > 0 || d[j][1] > 0) {
+                        pd[categories[j - 3]] = {
+                            injured: d[j][0],
+                            killed: d[j][1]
+                        };
+                    }
                 }
+                // Vehicle categories, # involved
                 for (j = 8; j < d.length; j += 1) {
                     pd.other[d[j][0]] = d[j][1];
                 }
@@ -112,25 +106,104 @@ LetsMap.Marker = L.Marker.extend({
     },
 
     /**
-     * Override initIcon to show popup on rollover.
+     * Shared function to aggregate data across many markers.
      */
-    _initIcon: function () {
-        var popup = this.popup,
-            map = this._map,
-            template = this._template,
-            data = this._data,
-            slider = this._slider;
-        L.Marker.prototype._initIcon.call(this);
-        $(this._icon).on('mouseenter', function () {
-            popup.setContent(Mustache.render(template.html(), data[slider.getIdx()]));
-            map.openPopup(popup);
-        });
-        $(this._icon).on('mouseleave', function () {
-            map.closePopup();
-        });
-        /*$(this._icon).on('click', function (e) {
-            console.log(e);
+    _aggregateData: function (markers) {
+        // About 8 seconds for 30K markers
+        return _.reduce(markers, this._aggregateSingleMarker, []);
+        // post-process into array for templating
+        /*aggregated.other = _.map(aggregated.other, function (v, k) {
+            return {
+                vehicle_type: k,
+                vehicle_count: v
+            };
         });*/
+    },
+
+    _aggregateSingleMarker: function (memo, m) {
+        _.each(m._data, function (d, i) {
+            if (!memo[i]) {
+                memo[i] = {
+                    accidentsWithInjuries: 0,
+                    accidents: 0,
+                    involved: 0,
+                    other: {}
+                };
+            }
+            var dm = memo[i],
+                dcyclists = d.cyclists,
+                dmotorists = d.motorists,
+                dpassengers = d.passengers,
+                dpedestr = d.pedestr,
+                dtotal = d.total,
+                dmcyclists = dm.cyclists,
+                dmmotorists = dm.motorists,
+                dmpassengers = dm.passengers,
+                dmpedestr = dm.pedestr,
+                dmtotal = dm.total;
+            dm.accidentsWithInjuries += d.accidentsWithInjuries;
+            dm.accidents += d.accidents;
+            dm.involved += d.involved;
+            if (dcyclists) {
+                if (dmcyclists) {
+                    dmcyclists.injured += dcyclists.injured;
+                    dmcyclists.killed += dcyclists.killed;
+                } else {
+                    dm.cyclists = {
+                        injured: dcyclists.injured,
+                        killed: dcyclists.killed
+                    };
+                }
+            }
+            if (dmotorists) {
+                if (dmmotorists) {
+                    dmmotorists.injured += dmotorists.injured;
+                    dmmotorists.killed += dmotorists.killed;
+                } else {
+                    dm.motorists = {
+                        injured: dmotorists.injured,
+                        killed: dmotorists.killed
+                    };
+                }
+            }
+            if (dpassengers) {
+                if (dmpassengers) {
+                    dmpassengers.injured += dpassengers.injured;
+                    dmpassengers.killed += dpassengers.killed;
+                } else {
+                    dm.passengers = {
+                        injured: dpassengers.injured,
+                        killed: dpassengers.killed
+                    };
+                }
+            }
+            if (dpedestr) {
+                if (dmpedestr) {
+                    dmpedestr.injured += dpedestr.injured;
+                    dmpedestr.killed += dpedestr.killed;
+                } else {
+                    dm.pedestr = {
+                        injured: dpedestr.injured,
+                        killed: dpedestr.killed
+                    };
+                }
+            }
+            if (dtotal) {
+                if (dmtotal) {
+                    dmtotal.injured += dtotal.injured;
+                    dmtotal.killed += dtotal.killed;
+                } else {
+                    dm.total = {
+                        injured: dtotal.injured,
+                        killed: dtotal.killed
+                    };
+                }
+            }
+            /*_.each(d.other, function (v, k) {
+                dm.other[k] = dm.other[k] ? dm.other[k] + v : v;
+            });*/
+        });
+        return memo;
     }
 });
 

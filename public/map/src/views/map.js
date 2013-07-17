@@ -23,12 +23,6 @@
 "use strict";
 
 /**
- * Default base layer.
- * @define {string}
- */
-var LETS_MAP_BASE_LAYER_DEFAULT = 'toner';
-
-/**
  * @param {Object} options
  * @constructor
  * @extends Backbone.View
@@ -42,62 +36,64 @@ LetsMap.MapView = Backbone.View.extend({
         /** @type {string} */
         this.MAP_HOLDER_ID = 'mapHolder';
 
-        /** @type {L.StamenTileLayer} */
-        this._base = new L.StamenTileLayer(LETS_MAP_BASE_LAYER_DEFAULT);
-
-        /** @type {LetsMap.SliderView} */
-        var slider = this.slider = new LetsMap.SliderView();
-        this.slider.$el.appendTo(this.$el);
-        this.slider.on('drag', _.myBind(this.render, this));
-        this.slider.on('endDrag', _.myBind(this.render, this));
-        this.lastSliderIdx = null;
-
-        /** @type {L.MarkerClusterGroup} */
-        var stopped = false;
-        this._markers = L.markerClusterGroup({
-            disableClusteringAtZoom: 17,
-            showCoverageOnHover: false,
-            maxClusterRadius: 40,
-            iconCreateFunction: function (cluster) {
-                var cnts = _.reduce(cluster.getAllChildMarkers(), function (memo, m) {
-                    _.each(m.getWeight(), function (d, i) {
-                        if (!memo[i]) {
-                            memo[i] = 0;
-                        }
-                        memo[i] += d;
-                    });
-                    return memo;
-                }, []),
-                    spans = "";
-                _.each(cnts, function (c, i) {
-                    spans += '<span style="display:none;" class="time' +
-                        i + '">' + c + '</span>';
-                });
-
-                return new L.DivIcon({
-                    html: '<div class="marker-cluster-small">' + spans + '</div>',
-                    iconSize: new L.Point(40, 40)
-                });
-            }
+        this._base = new L.TileLayer('http://otile2.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {
+            minZoom: 8,
+            maxZoom: 17,
+            attribution: 'Map data © OpenStreetMap contributors'
         });
 
-        /** @type {jQueryObject} **/
+        var $slider = this.$slider = $('<div />')
+            .attr('id', 'slider')
+            .appendTo(this.$el);
+
+        var $progressBar = this.$progressBar = $('<div />')
+            .progressbar()
+            .attr('id', 'progressbar')
+            .appendTo(this.$el);
+
+        var $title = this.$title = $('<div />')
+            .attr('id', 'title')
+            .appendTo(this.$el);
+
+        /** @type {L.MarkerClusterGroup} */
+        this._markers = L.markerClusterGroup({
+            disableClusteringAtZoom: 16,
+            showCoverageOnHover: false,
+            maxClusterRadius: 30,
+            zoomToBoundsOnClick: false,
+            animateAddingMarkers: false,
+            zoomAnimation: false,
+            iconCreateFunction: function (cluster) {
+                // Aggregate data for cluster once and memo it
+                if (!cluster._data) {
+                    var markers = cluster.getAllChildMarkers();
+                    cluster._data = LetsMap.Marker.prototype._aggregateData(markers);
+                    cluster._markerCount = markers.length;
+                    cluster._streetName = markers[0].options.icon.options.streetName;
+                }
+                return new LetsMap.Icon({
+                    marker: cluster,
+                    data: cluster._data,
+                    streetName: cluster._streetName,
+                    aggregate: true,
+                    count: cluster._markerCount,
+                    latlng: cluster._latlng,
+                    $slider: $slider
+                });
+            }
+        }).on('addinglayers', _.bind(function (data) {
+            this.showProgress('Adding layers', data.added, data.total);
+        }, this)).on('addedlayers', _.bind(function () {
+            this.hideProgress();
+            this._revalidateVisibleMarkers();
+            this._redrawVisibleMarkers(this.$slider.slider('value'));
+        }, this));
+
         this.$mapHolder = $('<div />')
             .attr({'id': this.MAP_HOLDER_ID})
             .appendTo(this.$el);
 
-        /** @type {?L.Map} **/
         this._map = null;
-
-        /** @type {L.LayerGroup} */
-        this._venueGroup = new L.LayerGroup();
-
-        /** @type {Array.<LetsMap.Marker>} */
-        //this.markers = [];
-
-        /** @type {function()} */
-        this.loadMarkers = this.loadMarkers || undefined;
-        this.loadMarkers();
 
         this.$progressDiv = $('<div />').attr('id', 'progress')
             .hide()
@@ -109,34 +105,32 @@ LetsMap.MapView = Backbone.View.extend({
      *
      * @this {LetsMap.AppView}
      */
-    loadMarkers: function () {
+    _loadMarkers: function () {
+        var $slider = this.$slider;
         $.getJSON('../../data/all_accidents.json', _.bind(function (data) {
+            //data = data.slice(0, 3000);
             var before = new Date(),
                 dataLen = data.length,
-                markers = [],
-                finishUp = _.bind(function () {
-                    before = new Date();
-                    this._markers.addLayers(markers, _.bind(function () {
-                        this.hideProgress();
-                    }, this), _.bind(function (added, total) {
-                        if (added % 3000 === 0) {
-                            this.showProgress("Preparing markers", added, total);
-                        }
-                    }, this));
-                }, this),
-                createMarker = _.bind(function (v) {
-                    markers.push(new LetsMap.Marker(v, this.slider));
-                    var markersLen = markers.length;
-                    if (markersLen % 3000 === 0) {
-                        this.showProgress("Creating markers", markersLen, dataLen);
+                added = 0,
+                i,
+                step = 500,
+                createMarkers = _.bind(function (data, start) {
+                    this._markers.addLayers(_.map(data.slice(start, start + step), function (v) {
+                        return new LetsMap.Marker(v, $slider);
+                    }));
+                    added += step;
+                    if (added % 5000 === 0) {
+                        this.showProgress("Added markers", added, dataLen);
                     }
-                    if (markersLen === dataLen) {
-                        finishUp();
+                    if (added >= dataLen) {
+                        var before = new Date();
+                        this._map.addLayer(this._markers);
+                    } else {
+                        // continue deferred loop
+                        _.defer(createMarkers, data, start + step);
                     }
                 }, this);
-            _.each(data, function (v) {
-                _.defer(createMarker, v);
-            });
+            createMarkers(data, 0);
         }, this));
     },
 
@@ -150,7 +144,7 @@ LetsMap.MapView = Backbone.View.extend({
      * @this {LetsMap.AppView}
      */
     showProgress: function (text, num, denom) {
-        this.$progressDiv.show().text(text + ": " + num + "/" + denom);
+        this.$progressBar.show().progressbar('value', (num / denom) * 100);
         console.log(text, ": ", num, "/", denom);
     },
 
@@ -160,79 +154,214 @@ LetsMap.MapView = Backbone.View.extend({
      * @this {LetsMap.AppView}
      */
     hideProgress: function () {
-        this.$progressDiv.fadeOut();
+        this.$progressBar.fadeOut().progressbar('disable');
     },
 
     /**
-     * Get the current view -- an object with zoom, lat, and lng.
-     * @this {LetsMap.AppView}
+     * Update the markers that are visible.
      */
-    getView: function () {
-        if (!this._map) {
-            throw new Error('Map has not yet been rendered.');
+    _revalidateVisibleMarkers: function () {
+        var height = $(window).height(),
+            width = $(window).width(),
+            self = this;
+        this._visibleMarkers = [];
+        $('.intersection-marker').each(function (i, m) {
+            var $m = $(m),
+                pos = $m.offset();
+            if (pos.left > 0 && pos.top > 0 && pos.left < width && pos.top < height) {
+                self._visibleMarkers.push([$m.children(), $m.data('letsmap')]);
+            }
+        });
+    },
+
+    _gradient: function (n) {
+        // 0: #bfc  rgb(187, 255, 204)
+        // 1: #fc9  rgb(255, 204, 153)
+        // 2: #f60  rgb(255, 102, 0)
+        var r, g, b;
+        if (n <= 1) {
+            n = n - 0.5;
+            r = 187 * (0.5 - n) + 255 * (0.5 + n);
+            g = 255 * (0.5 - n) + 204 * (0.5 + n);
+            b = 204 * (0.5 - n) + 153 * (0.5 + n);
+        } else if (n <= 2) {
+            n = n - 1.5;
+            r = 255 * (0.5 - n) + 255 * (0.5 + n);
+            g = 204 * (0.5 - n) + 102 * (0.5 + n);
+            b = 153 * (0.5 - n);
+        } else {
+            r = 255;
+            g = 102;
+            b = 0;
         }
-        var center = this._map.getCenter(),
-            sliderValue = this.slider.getValue();
-        return {
-            year: sliderValue[0],
-            month: sliderValue[1],
-            zoom: this._map.getZoom(),
-            lat: center.lat,
-            lng: center.lng
-        };
+        return "rgb(" + Math.floor(r) + "," + Math.floor(g) + "," + Math.floor(b) + ")";
+    },
+
+    /**
+     * Redraw them.
+     */
+    _redrawVisibleMarkers: function (sliderValue, force) {
+        var $slider = this.$slider,
+            //intensities = ['good', 'medium', 'bad'],
+            //densities = ['single', 'several', 'many'],
+            zoom = this._map.getZoom(),
+            gradient = this._gradient,
+            dimension = this._dimensionControl.getDimensionFunction();
+        _.each(this._visibleMarkers, function (v) {
+            var $m = v[0],
+                data = v[1],
+                intensity,
+                density,
+                cnt = data.count,
+                width,
+                color,
+                d;
+
+            if (data.lastValue === sliderValue && !force) {
+                return;
+            }
+            d = data.data[sliderValue - 11];
+            // zoom 16: single intersections only           0 1
+            // zoom 15: 1 - 5 intersections, avg 3          1 3
+            // zoom 14: 3 - 20 intersections, avg 10        2 9
+            // zoom 13: 10 - 70 intersections, avg 50       3 27
+            // zoom 12: 20 - 200 intersections, avg 100     4 81
+            // zoom 11: 50 - 600 intesrsections, avg 250    5 243
+            // zoom 10: 150 - 2000 intersections, avg 800   6 729
+            // zoom 9:  300 - 5000 intersections, avg 2500  7 2187
+
+            width = 20 * cnt / Math.pow(3, (16 - zoom));
+
+            if (d) {
+                color = gradient(dimension(d, cnt));
+            } else {
+                color = gradient(0);
+            }
+            if (cnt > 1) {
+                $m.css({
+                    'box-shadow': '0px 0px ' + Math.round(width) + 'px ' +
+                        Math.round(width * 3 / 4) + 'px' + ' ' + color,
+                    'background-color': color
+                });
+            } else {
+                $m.css({
+                    'background-color': color
+                });
+            }
+            data.lastValue = sliderValue;
+        });
     },
 
     /**
      * @this {LetsMap.AppView}
      */
-    render: function () {
-        var sliderIdx = this.slider.getIdx();
-
-        this.slider.render();
-
+    render: function (year, month, newZoom, lat, lng) {
         // initial setup
+        var newSliderValue = ((year - 2011) * 12) + month,
+            maxSlider = 22,
+            minSlider = 11,
+            minZoom = 9,
+            maxZoom = 17,
+            months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug',
+                'Sep', 'Oct', 'Nov', 'Dec'];
+        newSliderValue = newSliderValue > maxSlider ? maxSlider : newSliderValue;
+        newSliderValue = newSliderValue < minSlider ? minSlider : newSliderValue;
+        newZoom = newZoom > maxZoom ? maxZoom : newZoom;
+        newZoom = newZoom < minZoom ? minZoom : newZoom;
         if (!this._map) {
+            this.$slider.slider({
+                max: maxSlider,
+                min: minSlider,
+                value: newSliderValue,
+                animate: true
+            });
+            this.$title.text(months[month] + ' ' + year);
+            var popupTemplate = $('#markerTemplate').html();
             this._map = new L.Map(this.MAP_HOLDER_ID, {
-                center: new L.LatLng(40.70432661161239, -73.87447357177733),
-                zoom: 9,
+                center: new L.LatLng(lat, lng),
+                zoom: newZoom,
                 minZoom: 9,
-                maxZoom: 17
+                maxZoom: 17,
+                zoomAnimation: false,
+                markerZoomAnimation: false
             });
             this._map.addLayer(this._base);
-            this._map.addLayer(this._markers);
+
+            var dimensionControl = this._dimensionControl = new LetsMap.DimensionControl({
+                position: 'topright'
+            }).addTo(this._map);
+
+            this.$slider.on('slide', _.bind(function (evt, ui) {
+                var sliderValue = ui.value,
+                    year = Math.floor(sliderValue / 12) + 2011,
+                    month = sliderValue % 12,
+                    zoom = this._map.getZoom(),
+                    lat = this._map.getCenter().lat,
+                    lng = this._map.getCenter().lng;
+                this.trigger('changeview', year, month, zoom, lat, lng);
+                this.$title.text(months[month] + ' ' + year);
+                var popup = this._curPopup;
+                if (popup) {
+                    popup.setContent(Mustache.render(popupTemplate, {
+                        data: popup.options.data[ui.value - 11],
+                        streetName: popup.options.streetName,
+                        count: popup.options.count,
+                        aggregate: popup.options.aggregate
+                    }));
+                }
+                this._redrawVisibleMarkers(sliderValue);
+            }, this));
 
             // pass Leaflet events through to backbone
-            this._map.on('moveend', function (e) {
-                this.trigger('changeview');
-            }, this);
-            this.slider.on('endDrag', function (e) {
-                this.trigger('changeview');
+            this._map.on('dragend', function (e) {
+                var sliderValue = this.$slider.slider('value'),
+                    year = Math.floor(sliderValue / 12) + 2011,
+                    month = sliderValue % 12,
+                    zoom = this._map.getZoom(),
+                    lat = this._map.getCenter().lat,
+                    lng = this._map.getCenter().lng;
+                this.trigger('changeview', year, month, zoom, lat, lng);
+                this._revalidateVisibleMarkers();
+                this._redrawVisibleMarkers(sliderValue);
             }, this);
             this._map.on('zoomend', function (e) {
-                this.render();
+                var sliderValue = this.$slider.slider('value'),
+                    year = Math.floor(sliderValue / 12) + 2011,
+                    month = sliderValue % 12,
+                    zoom = this._map.getZoom(),
+                    lat = this._map.getCenter().lat,
+                    lng = this._map.getCenter().lng;
+                this.trigger('changeview', year, month, zoom, lat, lng);
+                this._revalidateVisibleMarkers();
+                this._redrawVisibleMarkers(sliderValue);
             }, this);
+
+            this._map.on('popupopen', _.bind(function (e) {
+                var popup = this._curPopup = e.popup;
+                var popupOptions = popup.options;
+                var sliderValue = this.$slider.slider('value');
+                popup.setContent(Mustache.render(popupTemplate, {
+                    data: popupOptions.data[sliderValue - 11],
+                    streetName: popupOptions.streetName,
+                    count: popupOptions.count,
+                    aggregate: popupOptions.aggregate
+                }));
+            }, this));
+            this._map.on('popupclose', _.bind(function (e) {
+                this._curPopup = null;
+            }, this));
+            this._map.on('dimensionchange', _.bind(function (e) {
+                var sliderValue = this.$slider.slider('value');
+                this._redrawVisibleMarkers(sliderValue, true);
+            }, this));
+
+            this._loadMarkers();
         }
 
-        if (sliderIdx !== this.lastSliderIdx) {
-            $('.time' + this.lastSliderIdx).hide();
-            this.lastSliderIdx = sliderIdx;
-            $('.time' + sliderIdx).show();
-        }
+        //this.$slider.slider("value", ((year - 2011) * 12) + month);
+        this._map.setZoom(newZoom);
+        this._map.panTo(new L.LatLng(lat, lng));
 
         return this;
-    },
-
-    /**
-     * @param {number} year
-     * @param {number} month
-     * @param {number} zoom
-     * @param {number} lat
-     * @param {number} lng
-     * @this {LetsMap.AppView}
-     */
-    goTo: function (year, month, zoom, lat, lng) {
-        this.slider.setValue(year, month);
-        this._map.setZoom(zoom);
-        this._map.panTo(new L.LatLng(lat, lng));
     }
 });
