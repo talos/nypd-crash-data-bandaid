@@ -36,12 +36,6 @@ LetsMap.MapView = Backbone.View.extend({
         /** @type {string} */
         this.MAP_HOLDER_ID = 'mapHolder';
 
-        this._base = new L.TileLayer('http://otile2.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {
-            minZoom: 8,
-            maxZoom: 17,
-            attribution: 'Map data © OpenStreetMap contributors'
-        });
-
         var $slider = this.$slider = $('<div />')
             .attr('id', 'slider')
             .appendTo(this.$el);
@@ -109,7 +103,7 @@ LetsMap.MapView = Backbone.View.extend({
     _loadMarkers: function () {
         var $slider = this.$slider;
         $.getJSON('../../data/all_accidents.json', _.bind(function (data) {
-            //data = data.slice(0, 3000);
+            data = data.slice(0, 3000);
             var before = new Date(),
                 dataLen = data.length,
                 added = 0,
@@ -263,6 +257,7 @@ LetsMap.MapView = Backbone.View.extend({
             minSlider = 7,
             minZoom = 10,
             maxZoom = 17,
+            attribution = 'Map data &copy; OpenStreetMap contributors',
             months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug',
                 'Sep', 'Oct', 'Nov', 'Dec'];
         if (year && month) {
@@ -284,15 +279,31 @@ LetsMap.MapView = Backbone.View.extend({
             });
             this.$title.text(months[month] + ' ' + year);
             var popupTemplate = $('#markerTemplate').html();
-            this._map = new L.Map(this.MAP_HOLDER_ID, {
+            var map = this._map = new L.Map(this.MAP_HOLDER_ID, {
                 center: new L.LatLng(lat, lng),
                 zoom: newZoom,
                 minZoom: 9,
                 maxZoom: 17,
                 zoomAnimation: false,
-                markerZoomAnimation: false
+                markerZoomAnimation: false,
+                zoomControl: false // added later
             });
-            this._map.addLayer(this._base);
+
+            var baseLayers = {
+                "Standard": new L.TileLayer('http://otile2.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {
+                    attribution: attribution
+                }),
+                "Cycle": new L.TileLayer('http://b.tile.opencyclemap.org/cycle/{z}/{x}/{y}.png', {
+                    attribution: attribution
+                }),
+                "Transit": new L.TileLayer('http://b.tile2.opencyclemap.org/transport/{z}/{x}/{y}.png', {
+                    attribution: attribution
+                })
+            };
+
+            map.addLayer(baseLayers.Standard);
+            new L.Control.Layers(baseLayers, [], {position: "topleft"}).addTo(this._map);
+            new L.Control.Zoom({position: "topleft"}).addTo(this._map);
 
             var dimensionControl = this._dimensionControl = new LetsMap.DimensionControl({
                 position: 'topright'
