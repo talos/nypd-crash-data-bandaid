@@ -3,6 +3,7 @@
 import csv
 import os
 import json
+import zipfile
 
 from generateAccidentSummaries import ALL_ACCIDENTS_NAME, PATH_TO_DATA
 
@@ -36,9 +37,16 @@ def run():
 
     # first pass -- create data_by_lonlat dict with lonlat keys, and subdatum
     # dicts
+    try:
+        os.remove(ALL_ACCIDENTS_NAME)
+    except:
+        pass
+
+    zipfile.ZipFile(os.path.join(PATH_TO_DATA, ALL_ACCIDENTS_NAME) + '.zip', 'r').extract(ALL_ACCIDENTS_NAME)
+
     data_by_lonlat = {}
     times = set()
-    with open(os.path.join(PATH_TO_DATA, ALL_ACCIDENTS_NAME)) as all_accidents:
+    with open(ALL_ACCIDENTS_NAME) as all_accidents:
         for line in csv.reader(all_accidents, delimiter=','):
             year, month, precinct, street_name, lon, lat, accidents_with_injuries, accidents, involved, category, injured, killed, vehicle_type, vehicle_count = line
 

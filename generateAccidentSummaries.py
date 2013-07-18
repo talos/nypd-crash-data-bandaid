@@ -21,7 +21,7 @@ def run():
     with open(PATH_TO_TMP_FILE, 'w') as tmp_accidents_file:
         needs_header = True
         # Traverse the accidents data and re-process all text output.
-        for el in os.walk(PATH_TO_DATA):
+        for el in sorted(os.walk(PATH_TO_DATA)):
             path, dirs, files = el
             if path.endswith('accidents'):
                 for filename in files:
