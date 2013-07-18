@@ -40,7 +40,6 @@ LetsMap.Icon = L.DivIcon.extend({
     createIcon: function () {
         var div,
             $div,
-            $slider = this.options.$slider,
             marker = this.options.marker,
             popup,
             self = this;

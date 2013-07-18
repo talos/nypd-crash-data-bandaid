@@ -6,7 +6,12 @@
         <link rel="stylesheet" href="css/letsmap.css" />
         <link rel="stylesheet" href="css/MarkerCluster.css" />
         <link rel="stylesheet" href="css/MarkerCluster.Default.css" />
-        <link rel="stylesheet" href="css/ui-darkness/jquery-ui-1.10.3.custom.css" />
+        <link rel="stylesheet" href="css/smoothness/jquery-ui-1.10.3.custom.css" />
+
+        <script type="text/html" id="sliderTemplate">
+          <div id="slider-current"></div>
+          <div id="slider-min"></div><div id="slider"></div><div id="slider-max"></div>
+        </script>
 
         <script type="text/html" id="dimensionControlTemplate">
           <a href="#8/accidentsWithInjuries" title="Accidents with Injuries" alt="Accidents with Injuries">
@@ -19,12 +24,12 @@
             <img src="images/involved.png" class="ideograph" />
           </a>
 
-          <div>&nbsp;</div>
+          <div class="dimension-spacer">&nbsp;</div>
 
           <a href="#20/pedestr/injured" title="Pedestrian" alt="Pedestrian">
             <img src="images/pedestrian.png" class="ideograph" />
           </a>
-          <a href="#20/cyclists/injured" title="Cyclist" alt="Cyclist">
+          <a href="#40/cyclists/injured" title="Cyclist" alt="Cyclist">
             <img src="images/cyclist.png" class="ideograph" />
           </a>
           <a href="#20/passengers/injured" title="Passenger" alt="Passenger">

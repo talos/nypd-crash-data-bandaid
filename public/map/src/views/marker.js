@@ -36,7 +36,7 @@ LetsMap.Marker = L.Marker.extend({
      * @param {Object} data
      * @this {L.Marker}
      */
-    initialize: function (data, $slider) {
+    initialize: function (data) {
         this._data = this._processData(data.slice(3));
         var streetName = data[0];
         var latlng = new L.LatLng(data[1], data[2]);
@@ -47,7 +47,6 @@ LetsMap.Marker = L.Marker.extend({
             streetName: streetName,
             marker: this,
             count: 1,
-            $slider: $slider,
             latlng: latlng
         });
     },

@@ -1,6 +1,7 @@
 body {
     margin: 0px;
     font-family: "Helvetica Neue", Helvetica, sans-serif;
+    font-weight: 200;
 }
 
 a {
@@ -15,43 +16,6 @@ a:hover {
 }
 a:active {
     outline: 0;
-}
-
-#app #about {
-    position: absolute;
-    width: 400px;
-    right: 10px;
-    top: 10px;
-    height: 500px;
-    z-index: 10000;
-    text-align: justify;
-    background-color: rgba(255, 255, 255, 0.9);
-    border: 1px solid black;
-    box-shadow: 2px 2px 0 black;
-    -o-box-shadow: 2px 2px 0 black;
-    -moz-box-shadow: 2px 2px 0 black;
-    -webkit-box-shadow: 2px 2px 0 black;
-}
-
-#app #about .text {
-    padding: 2em;
-    position: absolute;
-    overflow-y: scroll;
-    top: 0px;
-    bottom: 0px;
-}
-
-#app #about .text h2 {
-    font-variant: small-caps;
-    font-weight: 400;
-}
-
-#app #about .text div {
-    padding-bottom: 0.5em;
-}
-
-#app #about .text a {
-    color: red;
 }
 
 #app .ideograph {
@@ -76,20 +40,6 @@ a:active {
     height: 100%;
     z-index: 0;
 }
-
-/*
-@-moz-keyframes throb-moz {
-    from { color: red; }
-    50% { color: white; }
-    to { color: red; }
-}
-
-@-webkit-keyframes throb-webkit {
-    from { color: red; }
-    50% { color: white; }
-    to { color: red; }
-}
-    */
 
 #app #map #mapHolder .intersection-marker.aggregate div {
     border-radius: 100px;
@@ -162,13 +112,46 @@ a:active {
     background-color: white !important;
 }
 
-#app #map #slider {
+#app #map .dimension-control a {
+    padding: 5px;
+}
+
+#app #map .dimension-control a.selected {
+    background: #bbb;
+}
+
+#app #map .dimension-control .dimension-spacer {
+    background-color: #fff;
+    border-bottom: 1px solid #ccc;
+}
+
+#app #map .slider-control {
+    width: 500px;
+    background: white;
+    box-shadow: 0 1px 7px rgba(0,0,0,0.65);
+    -webkit-border-radius: 4px;
+            border-radius: 4px;
+    text-align: center;
+    padding: 8px 5px 5px 5px;
+    position: relative;
+}
+
+#app #map .slider-control div {
+    display: inline-block;
+    margin: 0 5px 0 5px;
+}
+
+#app #map .slider-control #slider-current {
     position: absolute;
-    bottom: 40px;
-    z-index: 100;
-    left: 100px;
-    right: 100px;
-    height: 10px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0px 0px 5px black;
+    font-size: 200%;
+    top: -40px;
+}
+
+#app #map .slider-control #slider {
+    width: 375px;
 }
 
 #app #map #progressbar {
@@ -180,24 +163,10 @@ a:active {
     z-index: 100;
 }
 
-#app #map #title {
-    position: absolute;
+#app #map #progressbar #progressbar-text {
+    position: relative;
     width: 100%;
     text-align: center;
-    font-size: 24px;
-    z-index: 100;
-    bottom: 10px;
-    color: #222;
-    font-family: helvetica neue, helvetica;
-    font-weight: 600;
-    text-shadow: 0px 0px 10px white;
-}
-
-#app #map .dimension-control a {
-    padding: 5px;
-}
-
-#app #map .dimension-control a.selected {
-    background: red;
+    top: -35px;
 }
 
