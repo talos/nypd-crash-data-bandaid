@@ -86,7 +86,8 @@ LetsMap.MapView = Backbone.View.extend({
         }, this)).on('addedlayers', _.bind(function () {
             this.hideProgress();
             this._revalidateVisibleMarkers();
-            this._redrawVisibleMarkers(this.$slider.slider('value'));
+            var minSlider = 7; // TODO fix this when slider is refactored into its own control
+            this._redrawVisibleMarkers(this.$slider.slider('value'), false, minSlider);
         }, this));
 
         this.$mapHolder = $('<div />')
@@ -200,7 +201,7 @@ LetsMap.MapView = Backbone.View.extend({
     /**
      * Redraw them.
      */
-    _redrawVisibleMarkers: function (sliderValue, force) {
+    _redrawVisibleMarkers: function (sliderValue, force, minSlider) {
         var $slider = this.$slider,
             //intensities = ['good', 'medium', 'bad'],
             //densities = ['single', 'several', 'many'],
@@ -220,7 +221,7 @@ LetsMap.MapView = Backbone.View.extend({
             if (data.lastValue === sliderValue && !force) {
                 return;
             }
-            d = data.data[sliderValue - 11];
+            d = data.data[sliderValue - minSlider];
             // zoom 16: single intersections only           0 1
             // zoom 15: 1 - 5 intersections, avg 3          1 3
             // zoom 14: 3 - 20 intersections, avg 10        2 9
@@ -258,14 +259,20 @@ LetsMap.MapView = Backbone.View.extend({
     render: function (year, month, newZoom, lat, lng) {
         // initial setup
         var newSliderValue = ((year - 2011) * 12) + month,
-            maxSlider = 22,
-            minSlider = 11,
-            minZoom = 9,
+            maxSlider = 28,
+            minSlider = 7,
+            minZoom = 10,
             maxZoom = 17,
             months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug',
                 'Sep', 'Oct', 'Nov', 'Dec'];
-        newSliderValue = newSliderValue > maxSlider ? maxSlider : newSliderValue;
-        newSliderValue = newSliderValue < minSlider ? minSlider : newSliderValue;
+        if (year && month) {
+            newSliderValue = newSliderValue > maxSlider ? maxSlider : newSliderValue;
+            newSliderValue = newSliderValue < minSlider ? minSlider : newSliderValue;
+        } else {
+            newSliderValue = maxSlider;
+            year = Math.round(newSliderValue / 12) + 2011;
+            month = newSliderValue % 12;
+        }
         newZoom = newZoom > maxZoom ? maxZoom : newZoom;
         newZoom = newZoom < minZoom ? minZoom : newZoom;
         if (!this._map) {
@@ -303,13 +310,13 @@ LetsMap.MapView = Backbone.View.extend({
                 var popup = this._curPopup;
                 if (popup) {
                     popup.setContent(Mustache.render(popupTemplate, {
-                        data: popup.options.data[ui.value - 11],
+                        data: popup.options.data[ui.value - minSlider],
                         streetName: popup.options.streetName,
                         count: popup.options.count,
                         aggregate: popup.options.aggregate
                     }));
                 }
-                this._redrawVisibleMarkers(sliderValue);
+                this._redrawVisibleMarkers(sliderValue, false, minSlider);
             }, this));
 
             // pass Leaflet events through to backbone
@@ -322,7 +329,7 @@ LetsMap.MapView = Backbone.View.extend({
                     lng = this._map.getCenter().lng;
                 this.trigger('changeview', year, month, zoom, lat, lng);
                 this._revalidateVisibleMarkers();
-                this._redrawVisibleMarkers(sliderValue);
+                this._redrawVisibleMarkers(sliderValue, false, minSlider);
             }, this);
             this._map.on('zoomend', function (e) {
                 var sliderValue = this.$slider.slider('value'),
@@ -333,7 +340,7 @@ LetsMap.MapView = Backbone.View.extend({
                     lng = this._map.getCenter().lng;
                 this.trigger('changeview', year, month, zoom, lat, lng);
                 this._revalidateVisibleMarkers();
-                this._redrawVisibleMarkers(sliderValue);
+                this._redrawVisibleMarkers(sliderValue, false, minSlider);
             }, this);
 
             this._map.on('popupopen', _.bind(function (e) {
@@ -341,7 +348,7 @@ LetsMap.MapView = Backbone.View.extend({
                 var popupOptions = popup.options;
                 var sliderValue = this.$slider.slider('value');
                 popup.setContent(Mustache.render(popupTemplate, {
-                    data: popupOptions.data[sliderValue - 11],
+                    data: popupOptions.data[sliderValue - minSlider],
                     streetName: popupOptions.streetName,
                     count: popupOptions.count,
                     aggregate: popupOptions.aggregate
@@ -352,7 +359,7 @@ LetsMap.MapView = Backbone.View.extend({
             }, this));
             this._map.on('dimensionchange', _.bind(function (e) {
                 var sliderValue = this.$slider.slider('value');
-                this._redrawVisibleMarkers(sliderValue, true);
+                this._redrawVisibleMarkers(sliderValue, true, minSlider);
             }, this));
 
             this._loadMarkers();

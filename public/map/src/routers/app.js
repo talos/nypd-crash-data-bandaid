@@ -48,7 +48,7 @@ LetsMap.AppRouter = Backbone.Router.extend({
         if (year && month && zoom && lat && lng) {
             this.view.map.render(year, month - 1, zoom, lat, lng);
         } else {
-            this.view.map.render(2011, 11, 9, 40.70432661161239, -73.87447357177733);
+            this.view.map.render(undefined, undefined, 10, 40.70432661161239, -73.87447357177733);
         }
     },
 

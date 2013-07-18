@@ -81,6 +81,7 @@ LetsMap.Marker = L.Marker.extend({
                 if (d > 0) {
                     data[i] = d - 1;
                     i -= 1;
+                    processedData.push(pd);
                 }
             } else {
                 pd.accidentsWithInjuries = d[0];
@@ -99,8 +100,8 @@ LetsMap.Marker = L.Marker.extend({
                 for (j = 8; j < d.length; j += 1) {
                     pd.other[d[j][0]] = d[j][1];
                 }
+                processedData.push(pd);
             }
-            processedData.push(pd);
         }
         return processedData;
     },
