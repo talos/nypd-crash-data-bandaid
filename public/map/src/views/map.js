@@ -39,6 +39,7 @@ LetsMap.MapView = Backbone.View.extend({
         var $progressBar = this.$progressBar = $('<div />')
             .progressbar()
             .attr('id', 'progressbar')
+            .addClass('leaflet-bar')
             .appendTo(this.$el);
 
         this.$progressBarText = $('<div />')
