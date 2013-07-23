@@ -147,50 +147,29 @@ class ParserException(Exception):
 
 def read_intersections_lonlat_dict(path):
     """
-    Generate a dict of all intersections for quick matching to lon/lat.
+    Generate a dict of all intersections for quick matching lon/lat.
     """
     result = {}
-    # '0' is for invalid/unidentified boros
-    for b in range(0, 6):
-        result[str(b)] = {}
     with open(path) as f:
         for line in f:
-            line = line.strip('\n\r')
-            boro, street1, street2, lon, lat  = line.split('\t')
+            line = line.strip()
+            boro, precinct, street1, street2, lon, lat = line.split('\t')
+            boro = int(boro)
             street1 = street1.lower()
             street2 = street2.lower()
-            boro_result = result[boro]
-            if lon and lat:
-                lon_lat = ('{0:.6f}'.format(float(lon)), '{0:.6f}'.format(float(lat)))
-            else:
-                lon_lat = None
-            street1_dict = boro_result.get(street1)
-            street2_dict = boro_result.get(street2)
-            if street1_dict:
-                street1_dict.update({
-                    street2: lon_lat
-                })
-            else:
-                boro_result[street1] = {
-                    street2: lon_lat
-                }
-
-            if street2_dict:
-                street2_dict.update({
-                    street1: lon_lat
-                })
-            else:
-                boro_result[street2] = {
-                    street1: lon_lat
-                }
+            key1 = (boro, street1, street2)
+            key2 = (boro, street2, street1)
+            if not key1 in result and not key2 in result:
+                result[key1] = (lon, lat)
 
     return result
 
 
-def write_intersections_lonlat_dict(path_to_file, borocode, street1, street2, lon, lat):
-    sys.stderr.write(u"Geocoded {0} and {1}, {2}\n".format(street1, street2, borocode))
+def write_intersections_file(borocode, precinct, street1, street2, lonlat):
     with open(INTERSECTIONS_LONLAT_PATH, 'a') as f:
-        f.write(u"\t".join([str(borocode), street1, street2, str(lon), str(lat)]) + '\n')
+        f.write(u"\t".join([str(borocode), str(precinct), street1, street2,
+                            str(lonlat[0]), str(lonlat[1])]) + u'\n')
+
 
 def geocode_intersection(street1, street2, borocode):
     """
@@ -206,16 +185,11 @@ def geocode_intersection(street1, street2, borocode):
                                                                street2,
                                                                BORO_NUM_TO_NAME[str(borocode)]))
         time.sleep(4)
-        latlon = (str(resp.latitude), str(resp.longitude), )
         lonlat = (str(resp.longitude), str(resp.latitude), )
-        write_intersections_lonlat_dict(INTERSECTIONS_LONLAT_PATH, borocode,
-                                        street1, street2, str(latlon[1]),
-                                        str(latlon[0]))
         return lonlat
     except GeocoderError as e:
-        write_intersections_lonlat_dict(INTERSECTIONS_LONLAT_PATH, borocode,
-                                        street1, street2, '', '')
-        sys.stderr.write(u"{0} for {1} and {2}\n".format(e, street1, street2))
+        sys.stderr.write(unicode(e) + u'\n')
+        return None
 
 
 def print_header():
@@ -546,34 +520,36 @@ def process_accidents(filename, intersections_lonlat_dict):
             data_missing_contributing = []
             missing_contributing = []
 
-    #import pdb
-    #pdb.set_trace()
-
-    #all_vehicles = {}
-    #all_factors = {}
     for row in filtered_rows:
         borocode = row[0]
-        boro_intersections_dict = intersections_lonlat_dict[str(borocode)]
+        precinct = row[1]
 
         intersection = row[mapping[INTERSECTION] + 4].value.split(u'and')
         injured = row[mapping[INJURED] + 4].value.split(u'\n')
         killed = row[mapping[KILLED] + 4].value.split(u'\n')
 
         lonlat = None
-        unknown_lonlat = False
         street1 = intersection[0].strip().replace(u'\n', u' ')
         street2 = intersection[1].strip().replace(u'\n', u' ')
-        street1_dict = boro_intersections_dict.get(street1.lower())
-        if street1_dict is not None:
-            lonlat = street1_dict.get(street2.lower())
-            if lonlat is None and street2.lower() in street1_dict:
-                unknown_lonlat = True
 
-        if lonlat is None and GEOCODER is not None and unknown_lonlat == False:
-            lonlat = geocode_intersection(street1, street2, borocode)
+        key1 = (borocode, street1.lower(), street2.lower())
+        key2 = (borocode, street2.lower(), street1.lower())
+        lonlat = intersections_lonlat_dict.get(key1) or intersections_lonlat_dict.get(key2)
 
         if lonlat is None:
-            lonlat = ('', '')
+            if GEOCODER is not None:
+                lonlat = geocode_intersection(street1, street2, borocode)
+            if lonlat is None:
+                lonlat = ('', '')
+            else:
+                intersections_lonlat_dict[(borocode,
+                                           street1.lower(),
+                                           street2.lower())] = lonlat
+                intersections_lonlat_dict[(borocode,
+                                           street2.lower(),
+                                           street1.lower())] = lonlat
+                write_intersections_file(borocode, precinct, street1,
+                                             street2, lonlat)
 
         vehicles = {}
         contributing_factors = {}
@@ -663,15 +639,6 @@ def process_accidents(filename, intersections_lonlat_dict):
             print_row.append(contributing_factors.get(c, ''))
 
         print(u'\t'.join(unicode(c) for c in print_row))
-
-        #for k, v in vehicles.items():
-        #    if all_vehicles.has_key(k):
-        #        all_vehicles[k] += v
-        #    else:
-        #        all_vehicles[k] = v
-        #all_vehicles.update(vehicles)
-        #all_factors.update(factors)
-
 
 
 if __name__ == '__main__':
