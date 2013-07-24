@@ -4,14 +4,14 @@ PUBLIC="public"
 DATA="${PUBLIC}/data"
 TMP="tmp"
 
-TMP_COLLISIONS="${TMP}/collisions.txt"
-TMP_SUMMONS="${TMP}/summons.txt"
+TMP_COLLISIONS="${TMP}/collisions.csv"
+TMP_SUMMONS="${TMP}/summons.csv"
 
-COLLISIONS_CSV="${PUBLIC}/collisions.txt"
-SUMMONS_CSV="${PUBLIC}/summons.txt"
+COLLISIONS_CSV="${PUBLIC}/collisions.csv"
+SUMMONS_CSV="${PUBLIC}/summons.csv"
 
-COLLISIONS_ARCHIVE="${DATA}/collisions.txt.gz"
-SUMMONS_ARCHIVE="${DATA}/summons.txt.gz"
+COLLISIONS_ARCHIVE="${DATA}/collisions.csv.gz"
+SUMMONS_ARCHIVE="${DATA}/summons.csv.gz"
 
 START_YEAR=2011
 START_MONTH=8
