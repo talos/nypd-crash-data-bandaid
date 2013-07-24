@@ -2,11 +2,11 @@
 <html>
     <head>
         <title>Let's map!</title>
-        <link rel="stylesheet" href="css/leaflet.css" />
-        <link rel="stylesheet" href="css/letsmap.css" />
-        <link rel="stylesheet" href="css/MarkerCluster.css" />
-        <link rel="stylesheet" href="css/MarkerCluster.Default.css" />
-        <link rel="stylesheet" href="css/smoothness/jquery-ui-1.10.3.custom.css" />
+        <link rel="stylesheet" href="/css/leaflet.css" />
+        <link rel="stylesheet" href="/css/letsmap.css" />
+        <link rel="stylesheet" href="/css/MarkerCluster.css" />
+        <link rel="stylesheet" href="/css/MarkerCluster.Default.css" />
+        <link rel="stylesheet" href="/css/smoothness/jquery-ui-1.10.3.custom.css" />
 
         <script type="text/html" id="sliderTemplate">
           <div id="slider-current"></div>
@@ -85,7 +85,7 @@
                 </tr>
                 <tr>
                   <th><img src="images/killed.png" title="Killed" alt="Killed" class="ideograph" /></th>
-                  <td>           {{#pedestr}}     {{killed}}{{/pedestr}}  {{^pedestr}}0{{/pedestr}}</td>
+                  <td>           {{#pedestr}}    {{killed}}{{/pedestr}}   {{^pedestr}}    0{{/pedestr}}</td>
                   <td>+</td><td> {{#cyclists}}   {{killed}}{{/cyclists}}  {{^cyclists}}   0{{/cyclists}}</td>
                   <td>+</td><td> {{#passengers}} {{killed}}{{/passengers}}{{^passengers}} 0{{/passengers}}</td>
                   <td>+</td><td> {{#motorists}}  {{killed}}{{/motorists}} {{^motorists}}  0{{/motorists}}</td>
@@ -106,13 +106,13 @@
     </head>
 
     <body>
-        <script type="text/javascript" src="js/lib/leaflet-src.js"></script>
-        <script type="text/javascript" src="js/lib/leaflet.markercluster-src.js"></script>
-        <script type="text/javascript" src="js/lib/mustache.js"></script>
-        <script type="text/javascript" src="js/lib/jquery-1.10.2.js"></script>
-        <script type="text/javascript" src="js/lib/jquery-ui-1.10.3.custom.js"></script>
-        <script type="text/javascript" src="js/lib/underscore-min.js"></script>
-        <script type="text/javascript" src="js/lib/backbone-min.js"></script>
-        <script type="text/javascript" src="js/letsmap.js"></script>
+        <script type="text/javascript" src="/js/lib/leaflet-src.js"></script>
+        <script type="text/javascript" src="/js/lib/leaflet.markercluster-src.js"></script>
+        <script type="text/javascript" src="/js/lib/mustache.js"></script>
+        <script type="text/javascript" src="/js/lib/jquery-1.10.2.js"></script>
+        <script type="text/javascript" src="/js/lib/jquery-ui-1.10.3.custom.js"></script>
+        <script type="text/javascript" src="/js/lib/underscore-min.js"></script>
+        <script type="text/javascript" src="/js/lib/backbone-min.js"></script>
+        <script type="text/javascript" src="/js/letsmap.js"></script>
     </body>
 </html>

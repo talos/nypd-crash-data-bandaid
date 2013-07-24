@@ -96,7 +96,7 @@ LetsMap.MapView = Backbone.View.extend({
      * @this {LetsMap.AppView}
      */
     _loadMarkers: function () {
-        var dataFile = 'data/collisions.json';
+        var dataFile = '/data/collisions.json';
         if (window.location.host.search('localhost') === -1) {
             dataFile += '.gz'; // For remote servers, use gzip.
         }
