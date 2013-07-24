@@ -1,9 +1,8 @@
 .DS_Store
-feed.xml
 /public/data/*
 config.ini
-log.txt
 tmp/
 *.pyc
 public/map/public/js
 public/map/node_modules
+public/feed.xml

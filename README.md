@@ -1,6 +1,6 @@
 # NYPD Crash Data Bandaid
 
-NYPD traffic crash [data][] has a booboo. This eases the pain.
+NYPD traffic collision [data][] has a booboo. This eases the pain.
 
   [data]: http://www.nyc.gov/html/nypd/html/traffic_reports/motor_vehicle_accident_data.shtml
 
@@ -19,41 +19,23 @@ NYPD traffic crash [data][] has a booboo. This eases the pain.
   [Streetsblog]: http://www.streetsblog.org/2012/02/15/nypds-lax-crash-investigations-may-violate-state-law
 
 Want to automatically download the latest NYPD traffic crash data as a
-CSV instead of PDF?  Done!
+CSV instead of hard-to-interpret Excel file?  Done!
 
 ## Installation
 
-First, make sure you have the handy pdftotext utility, part of [xpdf][].
-
-  [xpdf]: http://www.foolabs.com/xpdf/
-
-You will need Python (I've only tested with 2.7) and wget.
-
-On Mac:
-
-    brew install xpdf
-    brew install wget
-
-Debian:
-
-    sudo aptitude install xpdf-utils
-
-Then, clone the repo:
+First, clone the repo:
 
     git clone https://github.com/talos/nypd-crash-data-bandaid.git
+    cd nypd-crash-data-bandaid/
+
+You'll need Python 2.7, and preferably virtualenv/virtualenvwrapper.  Install
+the requirements in your virtualenv:
+
+    pip install requirements.txt
 
 And run the shell script:
 
-    cd nypd-crash-data-bandaid/
-    ./download.sh
-
-You will now be graced with a folder inside `public/data/`, named in the
-format `YYYYMM`, with borough-by-borough crash data as a CSV.
-
-If you have already downloaded the data currently on the site, the
-script will bow out gracefully and tell you there is no new data.  The
-NYPD doesn't keep historical files, but the script's placement of the
-CSV makes it easy for you to.
+    ./bandaid.sh
 
 You can even adapt the sample cronjob to run the script daily.
 
