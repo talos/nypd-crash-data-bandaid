@@ -18,7 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licences/>
 
 import os
-from pygeolib import GeocoderError
 import re
 import sys
 import time
@@ -28,6 +27,7 @@ from utility import ParserException, month2num, columnize
 
 try:
     import pygeocoder
+    from pygeolib import GeocoderError
     GEOCODER = pygeocoder.Geocoder
 except ImportError:
     sys.stderr.write(u"No geocoder available\n")
