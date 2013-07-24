@@ -15,28 +15,28 @@
 
         <script type="text/html" id="dimensionControlTemplate">
           <a href="#8/accidentsWithInjuries" title="Accidents with Injuries" alt="Accidents with Injuries">
-            <img src="images/accident-with-injury.png" class="ideograph" />
+            <img src="/images/accident-with-injury.png" class="ideograph" />
           </a>
           <a href="#2/accidents" title="Accidents" alt="Accidents">
-            <img src="images/accident.png" class="ideograph" />
+            <img src="/images/accident.png" class="ideograph" />
           </a>
           <a href="#1/involved" title="People Involved" alt="People Involved">
-            <img src="images/involved.png" class="ideograph" />
+            <img src="/images/involved.png" class="ideograph" />
           </a>
 
           <div class="dimension-spacer">&nbsp;</div>
 
           <a href="#20/pedestr/injured" title="Pedestrian" alt="Pedestrian">
-            <img src="images/pedestrian.png" class="ideograph" />
+            <img src="/images/pedestrian.png" class="ideograph" />
           </a>
           <a href="#40/cyclists/injured" title="Cyclist" alt="Cyclist">
-            <img src="images/cyclist.png" class="ideograph" />
+            <img src="/images/cyclist.png" class="ideograph" />
           </a>
           <a href="#20/passengers/injured" title="Passenger" alt="Passenger">
-            <img src="images/passenger.png" class="ideograph" />
+            <img src="/images/passenger.png" class="ideograph" />
           </a>
           <a href="#20/motorists/injured" title="Motorist" alt="Motorist">
-            <img src="images/motorist.png" class="ideograph" />
+            <img src="/images/motorist.png" class="ideograph" />
           </a>
         </script>
 
@@ -54,29 +54,29 @@
             <div class="data">
               <table>
                 <tr>
-                  <th><img src="images/accident-with-injury.png" title="Accidents with Injuries" alt="Accidents with Injuries" class="ideograph" /></th>
+                  <th><img src="/images/accident-with-injury.png" title="Accidents with Injuries" alt="Accidents with Injuries" class="ideograph" /></th>
                   <td>{{accidentsWithInjuries}}</td>
                 </tr>
                 <tr>
-                  <th><img src="images/accident.png" title="Accidents" alt="Accidents" class="ideograph" /></th>
+                  <th><img src="/images/accident.png" title="Accidents" alt="Accidents" class="ideograph" /></th>
                   <td>{{accidents}}</td>
                 </tr>
                 <tr>
-                  <th><img src="images/involved.png" title="People Involved" alt="People Involved" class="ideograph" /></th>
+                  <th><img src="/images/involved.png" title="People Involved" alt="People Involved" class="ideograph" /></th>
                   <td>{{involved}}</td>
                 </tr>
               </table>
               <table>
                 <tr>
                   <th></th>
-                  <th><img src="images/pedestrian.png" title="Pedestrian" alt="Pedestrian" class="ideograph" /></th>
-                  <th></th><th><img src="images/cyclist.png" title="Cyclist" alt="Cyclist" class="ideograph" /></th>
-                  <th></th><th><img src="images/passenger.png" title="Passenger" alt="Passenger" class="ideograph" /></th>
-                  <th></th><th><img src="images/motorist.png" title="Motorist" alt="Motorist" class="ideograph" /></th>
+                  <th><img src="/images/pedestrian.png" title="Pedestrian" alt="Pedestrian" class="ideograph" /></th>
+                  <th></th><th><img src="/images/cyclist.png" title="Cyclist" alt="Cyclist" class="ideograph" /></th>
+                  <th></th><th><img src="/images/passenger.png" title="Passenger" alt="Passenger" class="ideograph" /></th>
+                  <th></th><th><img src="/images/motorist.png" title="Motorist" alt="Motorist" class="ideograph" /></th>
                   <th></th><th></th>
                 </tr>
                 <tr>
-                  <th><img src="images/injured.png" title="Injured" alt="Injured" class="ideograph" /></th>
+                  <th><img src="/images/injured.png" title="Injured" alt="Injured" class="ideograph" /></th>
                   <td>           {{#pedestr}}   {{injured}}{{/pedestr}}   {{^pedestr}}    0{{/pedestr}}</td>
                   <td>+</td><td> {{#cyclists}}  {{injured}}{{/cyclists}}  {{^cyclists}}   0{{/cyclists}}</td>
                   <td>+</td><td> {{#passengers}}{{injured}}{{/passengers}}{{^passengers}} 0{{/passengers}}</td>
@@ -84,7 +84,7 @@
                   <td>=</td><td> {{#total}}     {{injured}}{{/total}}     {{^total}}      0{{/total}}</td>
                 </tr>
                 <tr>
-                  <th><img src="images/killed.png" title="Killed" alt="Killed" class="ideograph" /></th>
+                  <th><img src="/images/killed.png" title="Killed" alt="Killed" class="ideograph" /></th>
                   <td>           {{#pedestr}}    {{killed}}{{/pedestr}}   {{^pedestr}}    0{{/pedestr}}</td>
                   <td>+</td><td> {{#cyclists}}   {{killed}}{{/cyclists}}  {{^cyclists}}   0{{/cyclists}}</td>
                   <td>+</td><td> {{#passengers}} {{killed}}{{/passengers}}{{^passengers}} 0{{/passengers}}</td>

@@ -14,11 +14,11 @@ compile: clean
 
 # Deploy to S3
 deploy: compile
-	s3cmd --config=.s3cfg --acl-public --delete-removed \
+	s3cmd --config=.s3cfg --acl-public --delete-removed --exclude=.DS_Store \
 		sync public/js/ s3://nyc.crashmapper.com/js/
-	s3cmd --config=.s3cfg --acl-public --delete-removed \
+	s3cmd --config=.s3cfg --acl-public --delete-removed --exclude=.DS_Store \
 		sync public/css/ s3://nyc.crashmapper.com/css/
-	s3cmd --config=.s3cfg --acl-public --delete-removed \
+	s3cmd --config=.s3cfg --acl-public --delete-removed --exclude=.DS_Store \
 		sync public/images/ s3://nyc.crashmapper.com/images/
 	s3cmd --config=.s3cfg --acl-public\
 		--add-header "Content-Encoding:gzip" \
