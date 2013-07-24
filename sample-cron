@@ -22,7 +22,7 @@ PATH=/path/to/python/env:/path/to/other/bins:${PATH}
 
 #  Make sure to subsitute `/path/to/nypd-crash-data-bandaid/' with the actual path.
 
-@daily pushd /path/to/nypd-crash-data-bandaid/ && ./bandaid.sh >> log.txt && ./rss.py && popd
+@daily pushd /path/to/nypd-crash-data-bandaid/ && ./bandaid.sh >> log.txt && popd
 
 # This will run once a day, downloading one file to check whether
 # there is new data.  If there is, it will download all the files,
