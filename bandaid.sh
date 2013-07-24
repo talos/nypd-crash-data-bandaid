@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 PUBLIC="public"
 DATA="${PUBLIC}/data"
