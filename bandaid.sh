@@ -3,6 +3,7 @@
 PUBLIC="public"
 DATA="${PUBLIC}/data"
 TMP="tmp"
+MAP_PUBLIC="map/public"
 
 TMP_COLLISIONS_CSV="${TMP}/collisions.csv"
 TMP_SUMMONS_CSV="${TMP}/summons.csv"
@@ -12,7 +13,7 @@ COLLISIONS_CSV="${PUBLIC}/collisions.csv"
 SUMMONS_CSV="${PUBLIC}/summons.csv"
 
 COLLISIONS_CSV_ARCHIVE="${DATA}/collisions.csv.gz"
-COLLISIONS_JSON_ARCHIVE="${DATA}/collisions.json.gz"
+COLLISIONS_JSON_ARCHIVE="${MAP_PUBLIC}/collisions.json.gz"
 SUMMONS_CSV_ARCHIVE="${DATA}/summons.csv.gz"
 
 START_YEAR=2011

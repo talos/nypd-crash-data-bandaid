@@ -3,6 +3,7 @@
 config.ini
 tmp/
 *.pyc
-public/map/public/js
-public/map/node_modules
+map/public/js
+map/node_modules
 public/feed.xml
+.s3cfg

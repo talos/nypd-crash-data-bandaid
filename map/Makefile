@@ -1,8 +1,10 @@
 VERSION=v1
 
-compile:
-	mkdir -p public/js/lib
-	cp -r lib public/js/lib
+clean:
+	rm -rf public/js/*
+
+compile: clean
+	cp -r lib public/js/
 	cat src/letsmap.js \
 	    src/routers/* \
 	    src/views/* \
@@ -10,6 +12,6 @@ compile:
 	#uglifyjs -c -b -o public/js/letsmap.min.js public/js/letsmap.js
 	cp -R lib public/js/
 
-clean:
-	rm -r public/js/*
-	rm -r public/research/*
+# Deploy to S3
+deploy: compile
+	s3cmd --config=.s3cfg --acl-public sync public/ s3://nyc.crashmapper.com
