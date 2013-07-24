@@ -617,8 +617,8 @@ if __name__ == '__main__':
     intersections_lonlat_dict = read_intersections_lonlat_dict(INTERSECTIONS_LONLAT_PATH)
     print_header()
     for path in sys.argv[1:]:
-        name = os.path.basename(path)
-        if name.endswith('acc.xlsx') and name[0:2] in ('bk', 'bx', 'mn', 'qn', 'si'):
+        name = os.path.basename(path).lower()
+        if name.endswith('acc.xlsx') and not name.startswith('city'):
             sys.stderr.write(u"{0}\n".format(path))
             try:
                 process_accidents(path, intersections_lonlat_dict)
