@@ -32,9 +32,14 @@ LetsMap.Util = {};
 
 $(document).ready(function () {
     var v = new LetsMap.AppView({}),
-        r = new LetsMap.AppRouter({view: v});
+        r = new LetsMap.AppRouter({view: v}),
+        historyOpts = {};
     v.$el.appendTo('body');
     v.render();
 
-    Backbone.history.start({ pushState: false });
+    // Enable push state for non-local deploy.
+    if (window.location.host.search('localhost') === -1) {
+        historyOpts.pushState = true;
+    }
+    Backbone.history.start(historyOpts);
 });
