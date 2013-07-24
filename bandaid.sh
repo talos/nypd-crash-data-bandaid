@@ -38,3 +38,6 @@ gzip -c -9 ${SUMMONS_CSV} > ${SUMMONS_ARCHIVE}
 echo "Committing changes to git..."
 git add ${COLLISIONS_CSV} ${SUMMONS_CSV} ${PUBLIC}/intersections.txt
 git commit -m "$(date): Auto-updating data"
+
+echo "Publishing changes..."
+./bandaid/rss.py
