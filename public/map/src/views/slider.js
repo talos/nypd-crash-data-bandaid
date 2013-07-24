@@ -30,7 +30,7 @@ LetsMap.Slider = L.Control.extend({
     options: {
         position: 'bottomleft',
         min: 7,
-        max: 28
+        max: 29
     },
 
     onAdd: function (map) {

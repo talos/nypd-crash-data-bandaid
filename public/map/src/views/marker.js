@@ -37,9 +37,9 @@ LetsMap.Marker = L.Marker.extend({
      * @this {L.Marker}
      */
     initialize: function (data) {
-        this._data = this._processData(data.slice(3));
-        var streetName = data[0];
-        var latlng = new L.LatLng(data[1], data[2]);
+        this._data = this._processData(data.slice(4));
+        var streetName = data[2] + ' and ' + data[3];
+        var latlng = new L.LatLng(data[0], data[1]);
 
         L.Marker.prototype.initialize.call(this, latlng);
         this.options.icon = new LetsMap.Icon({
@@ -96,9 +96,10 @@ LetsMap.Marker = L.Marker.extend({
                     }
                 }
                 // Vehicle categories, # involved
-                for (j = 8; j < d.length; j += 1) {
+                /*for (j = 8; j < d.length; j += 1) {
                     pd.other[d[j][0]] = d[j][1];
-                }
+                }*/
+                // vehicle categories are now in 8, factors in 9
                 processedData.push(pd);
             }
         }

@@ -96,7 +96,7 @@ LetsMap.MapView = Backbone.View.extend({
      * @this {LetsMap.AppView}
      */
     _loadMarkers: function () {
-        var $xhr = $.getJSON('../../data/all_accidents.json', _.bind(function (data) {
+        var $xhr = $.getJSON('../../data/collisions.json', _.bind(function (data) {
             //data = data.slice(0, 3000);
             var before = new Date(),
                 dataLen = data.length,
