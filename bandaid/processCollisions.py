@@ -24,7 +24,7 @@ import sys
 import time
 import xlrd
 
-from utility import ParserException, month2num
+from utility import ParserException, month2num, columnize
 
 try:
     import pygeocoder
@@ -52,7 +52,7 @@ VEHICLES = set([u'Ambulance',
                 u'Taxi vehicle',
                 u'Unknown',
                 u'Van'])
-VEHICLE_COLUMNS = [re.sub(r'\s', '_', v.lower()) for v in sorted(VEHICLES)]
+VEHICLE_COLUMNS = [columnize(v) for v in sorted(VEHICLES)]
 
 CONTRIBUTING_FACTORS = set([u'Driver inexperience',
                             u'Fatigued/Drowsy',
@@ -84,7 +84,7 @@ CONTRIBUTING_FACTORS = set([u'Driver inexperience',
                             u'Unsafe lane changing',
                             u'Failure to keep right',
                             u'Drugs (illegal)'])
-CONTRIBUTING_COLUMNS = [re.sub(r'\s', '_', v.lower()) for v in sorted(CONTRIBUTING_FACTORS)]
+CONTRIBUTING_COLUMNS = [columnize(v) for v in sorted(CONTRIBUTING_FACTORS)]
 
 # Row types
 DATA = 'data'
