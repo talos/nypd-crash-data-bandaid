@@ -329,12 +329,25 @@ def identify_precinct(filename, rownum, row):
         raise ParserException(u"Could not identify precinct from", filename, rownum, row)
 
 
-def process_accidents(filename, intersections_lonlat_dict):
+def process_accidents(filename, intersections_lonlat_dict, already_processed):
     """
     Convert a single Excel file to a more generous CSV format.
+
+    Returns a (borocode, year, month) tuple.
     """
     sh = xlrd.open_workbook(filename).sheet_by_index(0)
     borocode, year, month = process_yearmonth_row(filename, 1, sh.row(1))
+
+    # NYPD sometimes includes "bonus" duplicate Excel file for a borough.
+    # These must be skipped to avoid dupe data.
+    if (borocode, year, month) in already_processed:
+        raise ParserException(u"Duplicate spreadsheet for borough {0}, "
+                              u"year {1}, month{2}: skipping.".format(
+                                  borocode, year, month),
+                              filename, 0, (borocode, year, month))
+    else:
+        already_processed.add((borocode, year, month))
+
     mapping = determine_column_names(filename, 2, sh.row(2))
     filtered_rows = []
     data_missing_vehicles = []
@@ -606,6 +619,8 @@ def process_accidents(filename, intersections_lonlat_dict):
 
         print(u'\t'.join(unicode(c) for c in print_row))
 
+    return (borocode, year, month)
+
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
@@ -615,12 +630,13 @@ if __name__ == '__main__':
         sys.exit(1)
 
     intersections_lonlat_dict = read_intersections_lonlat_dict(INTERSECTIONS_LONLAT_PATH)
+    already_processed = set([])
     print_header()
     for path in sys.argv[1:]:
         name = os.path.basename(path).lower()
         if name.endswith('acc.xlsx') and not name.startswith('city'):
             sys.stderr.write(u"{0}\n".format(path))
             try:
-                process_accidents(path, intersections_lonlat_dict)
+                process_accidents(path, intersections_lonlat_dict, already_processed)
             except ParserException as e:
                 sys.stderr.write("Parser error: {0}\n".format(e))
