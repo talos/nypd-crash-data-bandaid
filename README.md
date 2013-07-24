@@ -31,7 +31,7 @@ First, clone the repo:
 You'll need Python 2.7, and preferably virtualenv/virtualenvwrapper.  Install
 the requirements in your virtualenv:
 
-    pip install requirements.txt
+    pip install -r requirements.txt
 
 And run the shell script:
 
