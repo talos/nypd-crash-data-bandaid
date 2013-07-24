@@ -138,7 +138,7 @@ def read_intersections_lonlat_dict(path):
 def write_intersections_file(borocode, precinct, street1, street2, lonlat):
     with open(INTERSECTIONS_LONLAT_PATH, 'a') as f:
         f.write(u"\t".join([str(borocode), str(precinct), street1, street2,
-                            str(lonlat[0]), str(lonlat[1])]) + u'\n')
+                            str(lonlat[0]), str(lonlat[1]), '', '']) + u'\n')
 
 
 def geocode_intersection(street1, street2, borocode):
