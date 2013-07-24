@@ -1,5 +1,6 @@
 .DS_Store
 /public/data/*
+map/public/data
 config.ini
 tmp/
 *.pyc

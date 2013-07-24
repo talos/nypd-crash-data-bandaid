@@ -96,7 +96,11 @@ LetsMap.MapView = Backbone.View.extend({
      * @this {LetsMap.AppView}
      */
     _loadMarkers: function () {
-        var $xhr = $.getJSON('../../data/collisions.json', _.bind(function (data) {
+        var dataFile = 'data/collisions.json';
+        if (window.location.host.search('localhost') === -1) {
+            dataFile += '.gz'; // For remote servers, use gzip.
+        }
+        var $xhr = $.getJSON(dataFile, _.bind(function (data) {
             //data = data.slice(0, 3000);
             var before = new Date(),
                 dataLen = data.length,

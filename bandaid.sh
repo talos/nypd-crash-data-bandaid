@@ -3,7 +3,7 @@
 PUBLIC="public"
 DATA="${PUBLIC}/data"
 TMP="tmp"
-MAP_PUBLIC="map/public"
+MAP_DATA="map/public/data"
 
 TMP_COLLISIONS_CSV="${TMP}/collisions.csv"
 TMP_SUMMONS_CSV="${TMP}/summons.csv"
@@ -13,7 +13,7 @@ COLLISIONS_CSV="${PUBLIC}/collisions.csv"
 SUMMONS_CSV="${PUBLIC}/summons.csv"
 
 COLLISIONS_CSV_ARCHIVE="${DATA}/collisions.csv.gz"
-COLLISIONS_JSON_ARCHIVE="${MAP_PUBLIC}/collisions.json.gz"
+COLLISIONS_JSON_ARCHIVE="${MAP_DATA}/collisions.json.gz"
 SUMMONS_CSV_ARCHIVE="${DATA}/summons.csv.gz"
 
 START_YEAR=2011
@@ -22,6 +22,7 @@ START_MONTH=8
 mkdir -p ${PUBLIC}
 mkdir -p ${DATA}
 mkdir -p ${TMP}
+mkdir -p ${MAP_DATA}
 
 echo "Downloading data..."
 ./bandaid/download.py ${DATA} ${START_YEAR} ${START_MONTH}
@@ -40,7 +41,7 @@ echo "Generating JSON version of collisions..."
 echo "Zipping files for downloads folder..."
 gzip -c -9 ${COLLISIONS_CSV} > ${COLLISIONS_CSV_ARCHIVE}
 gzip -c -9 ${TMP_COLLISIONS_JSON} > ${COLLISIONS_JSON_ARCHIVE}
-rm ${TMP_COLLISIONS_JSON}
+mv ${TMP_COLLISIONS_JSON} ${MAP_DATA}
 gzip -c -9 ${SUMMONS_CSV} > ${SUMMONS_CSV_ARCHIVE}
 
 echo "Committing changes to git..."
@@ -49,3 +50,4 @@ git commit -m "$(date): Auto-updating data"
 
 echo "Publishing changes..."
 ./bandaid/rss.py
+cd map && make deploy

@@ -14,4 +14,15 @@ compile: clean
 
 # Deploy to S3
 deploy: compile
-	s3cmd --config=.s3cfg --acl-public sync public/ s3://nyc.crashmapper.com
+	s3cmd --config=.s3cfg --acl-public --delete-removed \
+		sync public/js/ s3://nyc.crashmapper.com/js/
+	s3cmd --config=.s3cfg --acl-public --delete-removed \
+		sync public/css/ s3://nyc.crashmapper.com/css/
+	s3cmd --config=.s3cfg --acl-public --delete-removed \
+		sync public/images/ s3://nyc.crashmapper.com/images/
+	s3cmd --config=.s3cfg --acl-public\
+		--add-header "Content-Encoding:gzip" \
+		--add-header "Content-Type:application/json" \
+		put public/data/collisions.json.gz s3://nyc.crashmapper.com/data/collisions.json.gz
+	s3cmd --config=.s3cfg --acl-public \
+		put public/index.html s3://nyc.crashmapper.com/index.html
