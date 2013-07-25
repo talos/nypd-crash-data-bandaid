@@ -6,13 +6,13 @@ body {
 
 a {
     text-decoration: none;
-    color: inherit;
+    color: blue;
 }
 a:visited {
-    color: inherit;
+    color: blue;
 }
 a:hover {
-    color: inherit;
+    color: blue;
 }
 a:active {
     outline: 0;
@@ -25,19 +25,23 @@ a:active {
     height: 100%;
 }
 
-#app #about div {
+#app #about .about-container {
     background: white;
     margin-top: 2em;
     margin-left: auto;
     margin-right: auto;
     width: 500px;
     padding: 1em;
+    background: white;
+    box-shadow: 0 1px 7px rgba(0,0,0,0.65);
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
 }
 
-#app #about div div {
+#app #about .about-container div {
     line-height: 1.5em;
     margin-top: 0px;
-    padding: 0.75em 0 0.75em 0;
+    padding: 0.5em 0 0.5em 0;
 }
 
 #app .ideograph {
