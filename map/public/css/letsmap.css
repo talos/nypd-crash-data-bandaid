@@ -98,6 +98,10 @@ a:active {
     border-bottom: 1px solid #ccc;
 }
 
+#app #map .help-control {
+    font-size: 150%;
+}
+
 #app #map .slider-control {
     width: 500px;
     background: white;

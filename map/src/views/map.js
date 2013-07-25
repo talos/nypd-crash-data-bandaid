@@ -325,6 +325,10 @@ LetsMap.MapView = Backbone.View.extend({
                 position: "bottomleft"
             }).addTo(this._map);
 
+            var helpControl = this._helpControl = new LetsMap.HelpControl({
+                position: 'topleft'
+            }).addTo(this._map);
+
             var dimensionControl = this._dimensionControl = new LetsMap.DimensionControl({
                 position: 'topright',
                 dimension: newDimension,

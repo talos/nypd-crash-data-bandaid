@@ -49,7 +49,10 @@ LetsMap.AppRouter = Backbone.Router.extend({
     },
 
     about: function () {
-        this.view.about.$el.show();
-        this.view.map.render(); // pre-load map
+        // pre-load map
+        if (!this.view.map._map) {
+            this.view.map.render();
+        }
+        this.view.about.$el.fadeIn();
     }
 });

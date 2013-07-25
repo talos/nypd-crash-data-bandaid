@@ -18,29 +18,32 @@
    *
    ***/
 
-/*jslint browser: true*/
-/*globals Backbone, $*/
+/*jslint browser: true, nomen: true*/
+/*globals Backbone, $, LetsMap, Mustache, L, _*/
 "use strict";
 
 /**
- * Global LetsMap reference.
- * @type {Object}
+ * @constructor
+ * @extends L.Control
  */
-var LetsMap = {};
+LetsMap.HelpControl = L.Control.extend({
+    options: {
+        position: 'topleft'
+    },
 
-LetsMap.Util = {};
+    onAdd: function (map) {
+        var div = L.DomUtil.create('div', 'help-control leaflet-bar'),
+            self = this;
+        div.innerHTML = $('#helpControlTemplate').html();
+        $('a', div).click(function (evt) {
+            evt.preventDefault();
+            LetsMap.router.navigate('about', {trigger: true});
+            return false;
+        });
+        return div;
+    },
 
-$(document).ready(function () {
-    var v = new LetsMap.AppView({}),
-        r = new LetsMap.AppRouter({view: v}),
-        historyOpts = {};
-    LetsMap.router = r;
-    v.$el.appendTo('body');
-    v.render();
+    onRemove: function (map) {
 
-    // Enable push state for non-local deploy.
-    if (window.location.host.search('localhost') === -1) {
-        historyOpts.pushState = true;
     }
-    Backbone.history.start(historyOpts);
 });
