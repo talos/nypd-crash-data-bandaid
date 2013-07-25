@@ -18,6 +18,28 @@ a:active {
     outline: 0;
 }
 
+#app #about {
+    position: absolute;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+}
+
+#app #about div {
+    background: white;
+    margin-top: 2em;
+    margin-left: auto;
+    margin-right: auto;
+    width: 500px;
+    padding: 1em;
+}
+
+#app #about div div {
+    line-height: 1.5em;
+    margin-top: 0px;
+    padding: 0.75em 0 0.75em 0;
+}
+
 #app .ideograph {
     max-height: 20px;
     max-width: 20px;
@@ -46,9 +68,8 @@ a:active {
 }
 
 #app #map #mapHolder .intersection-marker.single div {
-    border-radius: 100px;
-    border: 1px solid black;
-    box-shadow: 2px 2px 2px black;
+    /*border: 1px solid black;
+    box-shadow: 2px 2px 2px black;*/
 }
 
 #app #map #mapHolder .intersection-marker div {
@@ -57,55 +78,6 @@ a:active {
     margin-left: -6px;
     margin-top: -6px;
 }
-
-/*
-#app #map #mapHolder .intersection-marker div.good {
-    background-color: #3c6;
-    border: 2px solid #cfd;
-    color: #bfc;
-    background-color: #bfc;
-}
-
-#app #map #mapHolder .intersection-marker div.medium {
-    background-color: #ffb333;
-    border: 1px solid #ff9;
-    color: #fc9;
-    background-color: #fc9;
-}
-
-#app #map #mapHolder .intersection-marker div.bad {
-    background-color: #f36;
-    border: 1px solid #f96;
-    color: #f60;
-    background-color: #f60;
-}
-*/
-
-/*
-#app #map #mapHolder .intersection-marker div.single {
-    width: 8px;
-    height: 8px;
-    margin-left: -5px;
-    margin-top: -5px;
-    box-shadow: 0px 0px 2px 3px;
-}
-
-#app #map #mapHolder .intersection-marker div.several {
-    width: 12px;
-    height: 12px;
-    margin-left: -7px;
-    margin-top: -7px;
-    box-shadow: 0px 0px 4px 3px;
-}
-
-#app #map #mapHolder .intersection-marker div.many {
-    width: 18px;
-    height: 18px;
-    margin-left: -10px;
-    margin-top: -10px;
-    box-shadow: 0px 0px 3px 2px;
-}
-    */
 
 #app #map #mapHolder .intersection-marker div:hover {
     color: black !important;
@@ -144,10 +116,17 @@ a:active {
 #app #map .slider-control #slider-current {
     position: absolute;
     font-weight: bold;
-    color: white;
-    text-shadow: 0px 0px 5px black;
-    font-size: 200%;
-    top: -40px;
+    color: black;
+    text-shadow: 0px 0px 5px white;
+    font-size: 3em;
+    left: 520px;
+    top: -14px;
+    width: 100%;
+    text-align: left;
+}
+
+#app #map .slider-control #slider-current .layer {
+    font-size: 60%;
 }
 
 #app #map .slider-control #slider {
@@ -160,7 +139,7 @@ a:active {
     height: 40px;
     left: 100px;
     right: 100px;
-    z-index: 100;
+    z-index: 1;
 }
 
 #app #map #progressbar #progressbar-text {

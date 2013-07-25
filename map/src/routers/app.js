@@ -26,33 +26,30 @@ LetsMap.AppRouter = Backbone.Router.extend({
     initialize: function (options) {
         this.view = options.view;
 
-        // routes are assigned manually from an array in order to
-        // ensure their ordering and use a regular expression.
-        var routes = [
-            ['', 'map'],
-            ['about', 'about'],
-            ['map/:year/:month/:zoom/:lat/:lng', 'map']
-        ];
-
-        _.each(routes, _.bind(function (route) {
-            this.route(route[0], route[1]);
-        }, this));
-
-        this.view.map.on('changeview', function (year, month, zoom, lat, lng) {
-            this.navigate('map/' + year + '/' + (month + 1) + '/' + zoom + '/' + lat + '/' + lng);
+        this.view.map.on('changeview', function (year, month, base, dimension,
+                                                 volume, zoom, lat, lng) {
+            this.navigate([year, month + 1, base.toLowerCase(),
+                          dimension.toLowerCase(), volume, zoom,
+                          lat.toPrecision(5), lng.toPrecision(5)].join('/'));
         }, this);
     },
 
-    map: function (year, month, zoom, lat, lng) {
-        this.view.about.$el.hide();
-        if (year && month && zoom && lat && lng) {
-            this.view.map.render(year, month - 1, zoom, lat, lng);
-        } else {
-            this.view.map.render(undefined, undefined, 10, 40.70432661161239, -73.87447357177733);
-        }
+    routes: {
+        'about': 'about',
+        ':year/:month/:base/:dimension/:volume/:zoom/:lat/:lng': 'map',
+        '*notFound': 'notFound',
+    },
+
+    map: function (year, month, base, dimension, volume, zoom, lat, lng) {
+        this.view.map.render(year, month - 1, base, dimension, volume, zoom, lat, lng);
+    },
+
+    notFound: function () {
+        this.navigate('about', {trigger: true});
     },
 
     about: function () {
         this.view.about.$el.show();
+        this.view.map.render(); // pre-load map
     }
 });

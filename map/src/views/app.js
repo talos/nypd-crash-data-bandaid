@@ -22,12 +22,6 @@
 /*globals Backbone, $, LetsMap, Mustache, _*/
 "use strict";
 
-// Ew, but closure compiler has special ideas about the meaning of 'bind'.
-/**
- * @type{function(function(jQuery.event), Object): function(...[*])}
- */
-_.myBind = function () { return _.bind.apply(this, arguments); };
-
 /**
  * @param {Object} options
  * @constructor
@@ -41,12 +35,10 @@ LetsMap.AppView = Backbone.View.extend({
      */
     initialize: function (options) {
         /** @type {LetsMap.MapView} */
+        this.about = new LetsMap.AboutView({}).render();
+        this.about.$el.appendTo(this.$el).hide();
         this.map = new LetsMap.MapView({});
         this.map.$el.appendTo(this.$el);
-        this.infoBox = new LetsMap.InfoBoxView({});
-        this.infoBox.$el.appendTo(this.$el);
-        this.about = new LetsMap.AboutView({});
-        this.about.$el.appendTo(this.$el);
     },
 
     /**

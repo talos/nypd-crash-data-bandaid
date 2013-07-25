@@ -29,64 +29,76 @@
 LetsMap.DimensionControl = L.Control.extend({
     options: {
         position: 'topright',
-        dim1: 'accidents',
-        mult: 2
+        dimension: 'collisions',
+        volume: 2
     },
 
     onAdd: function (map) {
         var div = L.DomUtil.create('div', 'dimension-control leaflet-bar'),
+            dimensions = this._dimensions = {},
             self = this;
         div.innerHTML = $('#dimensionControlTemplate').html();
-        $(div, 'a').on('click', function (evt) {
-            evt.preventDefault();
-            var $el = $(evt.target);
-            if (!$el.attr('href')) { // handle when image receives click
-                $el = $el.parent();
-            }
-            self.selectDimension.apply(self, $el.attr('href').slice(1).split('/'));
-            return false;
+        this.volume = this.options.volume;
+        this.dimension = this.options.dimension;
+        $.each($('a', div), function (i, el) {
+            var $el = $(el),
+                dim = $el.attr('href').slice(1),
+                volume = Number($el.attr('data-volume'));
+            dimensions[dim] = $el;
+            $el.on('click', function (evt) {
+                evt.preventDefault();
+                self.selectDimension(dim, volume);
+                return false;
+            });
         });
-        this.highlightCurrentDimension(div);
+        this.highlightCurrentDimension();
         return div;
     },
 
-    highlightCurrentDimension: function (el) {
-        var href = '#' + this.options.mult + '/' + this.options.dim1,
-            $el = $(el);
-        if (this.options.dim2) {
-            href = href + '/' + this.options.dim2;
-        }
-        $el.children('a').removeClass('selected');
-        $el.children('a[href="' + href + '"]').addClass('selected');
+    highlightCurrentDimension: function () {
+        var curDim = this.dimension;
+        _.each(this._dimensions, _.bind(function ($el, dim) {
+            if (curDim === dim) {
+                $el.addClass('selected');
+                this.updateTitle($el.attr('title'));
+            } else {
+                $el.removeClass('selected');
+            }
+        }, this));
     },
 
-    selectDimension: function (mult, dim1, dim2) {
+    updateTitle: function (title) {
+        $('#slider-current .layer').text(title);
+    },
+
+    selectDimension: function (dim, volume) {
         var trigger = false,
             href,
             el;
-        if (this.options.dim1 !== dim1 || this.options.dim2 !== dim2) {
-            trigger = true;
+        if (this.dimension === dim || !_.has(this._dimensions, dim)) {
+            return;
         }
-        this.options.mult = Number(mult);
-        this.options.dim1 = dim1;
-        this.options.dim2 = dim2;
-        if (trigger) {
-            this.highlightCurrentDimension(this.getContainer());
-            this._map.fire('dimensionchange');
-        }
+        this.dimension = dim;
+        this.volume = volume;
+        this.highlightCurrentDimension();
+        this._map.fire('dimensionchange');
     },
 
     getDimensionFunction: function () {
-        var mult = this.options.mult,
-            dim1 = this.options.dim1,
-            dim2 = this.options.dim2;
-        if (!dim2) {
+        var volume = this.volume,
+            dimension = this.dimension;
+        // crazy performance penalties otherwise!
+        if (dimension === 'collisions-with-injuries') {
+            dimension = 'collisionsWithInjuries';
+        }
+        if (dimension.slice(-8) === '-injured') {
+            dimension = dimension.slice(0, -8);
             return function (d, cnt) {
-                return d[dim1] * mult / cnt;
+                return d[dimension] ? d[dimension].injured * volume / cnt : 0;
             };
         } else {
             return function (d, cnt) {
-                return d[dim1] ? d[dim1][dim2] * mult / cnt : 0;
+                return d[dimension] * volume / cnt;
             };
         }
     },

@@ -59,7 +59,7 @@ LetsMap.Marker = L.Marker.extend({
      */
     _processData: function (data) {
         var processedData = [],
-            categories = ['cyclists', 'motorists', 'passengers', 'pedestr',
+            categories = ['cyclists', 'motorists', 'passengers', 'pedestrians',
                 'total'],
             i,
             j,
@@ -68,8 +68,8 @@ LetsMap.Marker = L.Marker.extend({
         for (i = 0; i < data.length; i += 1) {
             d = data[i];
             pd = {
-                accidentsWithInjuries: 0,
-                accidents: 0,
+                collisionsWithInjuries: 0,
+                collisions: 0,
                 involved: 0,
                 other: {}
             };
@@ -83,8 +83,8 @@ LetsMap.Marker = L.Marker.extend({
                     processedData.push(pd);
                 }
             } else {
-                pd.accidentsWithInjuries = d[0];
-                pd.accidents = d[1];
+                pd.collisionsWithInjuries = d[0];
+                pd.collisions = d[1];
                 pd.involved = d[2];
                 // Main categories, injured/killed counts
                 for (j = 3; j < 8; j += 1) {
@@ -125,8 +125,8 @@ LetsMap.Marker = L.Marker.extend({
         _.each(m._data, function (d, i) {
             if (!memo[i]) {
                 memo[i] = {
-                    accidentsWithInjuries: 0,
-                    accidents: 0,
+                    collisionsWithInjuries: 0,
+                    collisions: 0,
                     involved: 0,
                     other: {}
                 };
@@ -135,15 +135,15 @@ LetsMap.Marker = L.Marker.extend({
                 dcyclists = d.cyclists,
                 dmotorists = d.motorists,
                 dpassengers = d.passengers,
-                dpedestr = d.pedestr,
+                dpedestrians = d.pedestrians,
                 dtotal = d.total,
                 dmcyclists = dm.cyclists,
                 dmmotorists = dm.motorists,
                 dmpassengers = dm.passengers,
-                dmpedestr = dm.pedestr,
+                dmpedestrians = dm.pedestrians,
                 dmtotal = dm.total;
-            dm.accidentsWithInjuries += d.accidentsWithInjuries;
-            dm.accidents += d.accidents;
+            dm.collisionsWithInjuries += d.collisionsWithInjuries;
+            dm.collisions += d.collisions;
             dm.involved += d.involved;
             if (dcyclists) {
                 if (dmcyclists) {
@@ -178,14 +178,14 @@ LetsMap.Marker = L.Marker.extend({
                     };
                 }
             }
-            if (dpedestr) {
-                if (dmpedestr) {
-                    dmpedestr.injured += dpedestr.injured;
-                    dmpedestr.killed += dpedestr.killed;
+            if (dpedestrians) {
+                if (dmpedestrians) {
+                    dmpedestrians.injured += dpedestrians.injured;
+                    dmpedestrians.killed += dpedestrians.killed;
                 } else {
-                    dm.pedestr = {
-                        injured: dpedestr.injured,
-                        killed: dpedestr.killed
+                    dm.pedestrians = {
+                        injured: dpedestrians.injured,
+                        killed: dpedestrians.killed
                     };
                 }
             }

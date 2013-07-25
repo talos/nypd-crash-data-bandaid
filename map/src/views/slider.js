@@ -57,7 +57,7 @@ LetsMap.Slider = L.Control.extend({
         });
         $('#slider-min', div).text(this._prettyValue(this.options.min));
         $('#slider-max', div).text(this._prettyValue(this.options.max));
-        this.$currentDiv = $('#slider-current', div);
+        this.$currentDiv = $('#slider-current .time', div);
         this._updateCurrentDiv();
         return div;
     },

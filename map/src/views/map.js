@@ -229,6 +229,8 @@ LetsMap.MapView = Backbone.View.extend({
                 cnt = data.count,
                 width,
                 color,
+                darkColor,
+                n = 0,
                 d;
 
             if (data.lastValue === idx && !force) {
@@ -247,20 +249,31 @@ LetsMap.MapView = Backbone.View.extend({
             width = 20 * cnt / Math.pow(3, (16 - zoom));
 
             if (d) {
-                color = gradient(dimension(d, cnt));
+                n = dimension(d, cnt);
+            }
+            if (n > 0) {
+                color = gradient(n);
+                darkColor = gradient(2 / n);
             } else {
                 color = gradient(0);
+                darkColor = gradient(2);
             }
             if (cnt > 1) {
                 $m.css({
                     'box-shadow': '0px 0px ' + Math.round(width) + 'px ' +
                         Math.round(width * 3 / 4) + 'px' + ' ' + color,
-                    'background-color': color
+                    'background-color': color,
+                    'border': '1px solid ' + darkColor
                 });
             } else {
-                $m.css({
-                    'background-color': color
-                });
+                if (n > 0) {
+                    $m.show().css({
+                        'background-color': color,
+                        'border': '1px solid ' + darkColor
+                    });
+                } else {
+                    $m.hide();
+                }
             }
             data.lastValue = idx;
         });
@@ -269,11 +282,16 @@ LetsMap.MapView = Backbone.View.extend({
     /**
      * @this {LetsMap.AppView}
      */
-    render: function (newYear, newMonth, newZoom, lat, lng) {
+    render: function (newYear, newMonth, newBase, newDimension, newVolume, newZoom, lat, lng) {
         // initial setup
         var attribution = 'Map data &copy; OpenStreetMap contributors';
-        //newZoom = newZoom > maxZoom ? maxZoom : newZoom;
-        //newZoom = newZoom < minZoom ? minZoom : newZoom;
+        newBase = newBase ? newBase.charAt(0).toUpperCase() + newBase.slice(1).toLowerCase() : 'Standard';
+        newDimension = newDimension ? newDimension.toLowerCase() : 'collisions';
+        newVolume = newVolume || 2;
+        lat = lat || 40.704;
+        lng = lng || -73.874;
+        newZoom = newZoom || 10;
+
         if (!this._map) {
             var popupTemplate = $('#markerTemplate').html();
             var map = this._map = new L.Map(this.MAP_HOLDER_ID, {
@@ -286,7 +304,7 @@ LetsMap.MapView = Backbone.View.extend({
                 zoomControl: false // added later
             });
 
-            var baseLayers = {
+            var baseLayers = this._baseLayers = {
                 "Standard": new L.TileLayer('http://otile2.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {
                     attribution: attribution
                 }),
@@ -298,20 +316,46 @@ LetsMap.MapView = Backbone.View.extend({
                 })
             };
 
-            map.addLayer(baseLayers.Standard);
+            this._baseLayerName = _.has(baseLayers, newBase) ? newBase : 'Standard';
+            map.addLayer(baseLayers[this._baseLayerName]);
+
             new L.Control.Layers(baseLayers, [], {position: "topleft"}).addTo(this._map);
             new L.Control.Zoom({position: "topleft"}).addTo(this._map);
-            var slider = this._slider = new LetsMap.Slider({position: "bottomleft"}).addTo(this._map);
+            var slider = this._slider = new LetsMap.Slider({
+                position: "bottomleft"
+            }).addTo(this._map);
 
             var dimensionControl = this._dimensionControl = new LetsMap.DimensionControl({
-                position: 'topright'
+                position: 'topright',
+                dimension: newDimension,
+                volume: newVolume
             }).addTo(this._map);
+
+            this._map.on('dimensionchange baselayerchange moveend', _.bind(function (e) {
+                if (e.type === 'baselayerchange') {
+                    this._baseLayerName = e.name;
+                }
+                var sliderValue = slider.getValue(),
+                    zoom = this._map.getZoom(),
+                    center = this._map.getCenter(),
+                    force = true;
+                this.trigger('changeview', sliderValue.year, sliderValue.month,
+                             this._baseLayerName, dimensionControl.dimension,
+                             dimensionControl.volume, zoom,
+                             center.lat, center.lng);
+                if (e.type === 'moveend') {
+                    this._revalidateVisibleMarkers();
+                    force = false;
+                }
+                this._redrawVisibleMarkers(sliderValue.idx, force);
+            }, this));
 
             this._map.on('slide', _.bind(function (e) {
                 var zoom = this._map.getZoom(),
-                    lat = this._map.getCenter().lat,
-                    lng = this._map.getCenter().lng;
-                this.trigger('changeview', e.year, e.month, zoom, lat, lng);
+                    center = this._map.getCenter();
+                this.trigger('changeview', e.year, e.month, this._baseLayerName,
+                             dimensionControl.dimension, dimensionControl.volume,
+                             zoom, center.lat, center.lng);
                 var popup = this._curPopup;
                 if (popup) {
                     popup.setContent(Mustache.render(popupTemplate, {
@@ -324,17 +368,6 @@ LetsMap.MapView = Backbone.View.extend({
                 this._redrawVisibleMarkers(e.idx, false);
             }, this));
 
-            // pass Leaflet events through to backbone
-            this._map.on('dragend zoomend', function (e) {
-                var sliderValue = slider.getValue(),
-                    zoom = this._map.getZoom(),
-                    lat = this._map.getCenter().lat,
-                    lng = this._map.getCenter().lng;
-                this.trigger('changeview', sliderValue.year, sliderValue.month, zoom, lat, lng);
-                this._revalidateVisibleMarkers();
-                this._redrawVisibleMarkers(sliderValue.idx, false);
-            }, this);
-
             this._map.on('popupopen', _.bind(function (e) {
                 var popup = this._curPopup = e.popup;
                 popup.setContent(
@@ -343,11 +376,9 @@ LetsMap.MapView = Backbone.View.extend({
                     }))
                 );
             }, this));
+
             this._map.on('popupclose', _.bind(function (e) {
                 this._curPopup = null;
-            }, this));
-            this._map.on('dimensionchange', _.bind(function (e) {
-                this._redrawVisibleMarkers(slider.getValue().idx, true);
             }, this));
 
             this._loadMarkers();

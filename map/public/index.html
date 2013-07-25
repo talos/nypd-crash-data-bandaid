@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title>Let's map!</title>
+        <title>NYC Crashmapper</title>
         <link rel="stylesheet" href="/css/leaflet.css" />
         <link rel="stylesheet" href="/css/letsmap.css" />
         <link rel="stylesheet" href="/css/MarkerCluster.css" />
@@ -9,37 +9,63 @@
         <link rel="stylesheet" href="/css/smoothness/jquery-ui-1.10.3.custom.css" />
 
         <script type="text/html" id="sliderTemplate">
-          <div id="slider-current"></div>
+          <div id="slider-current">
+            <span class="time"></span>: <span class="layer"></span>
+          </div>
           <div id="slider-min"></div><div id="slider"></div><div id="slider-max"></div>
         </script>
 
         <script type="text/html" id="aboutTemplate">
-
+          <div class="leaflet-bar">
+            <div>
+              <b>NYC Crashmapper</b> lets you browse and analyze several years of
+              intersection-level collision data on a map of NYC.
+            </div>
+            <div>
+              The slider at the bottom changes which month of data are on
+              the map.
+            </div>
+            <div>
+              The buttons on the right change which sorts of collisions
+              are colored on the map.  Hover over a button to find out what it
+              means.
+            </div>
+            <div>
+              Click on an intersection or bubble to get a breakdown of the sorts
+              of collisions that happened there.
+            </div>
+            <div>
+              The buttons on the top left let you change the base map.
+            </div>
+            <div style="text-align:center;">
+              <button type="button" class="ui-widget" id="aboutDismiss" alt="OK" title="OK">OK</button>
+            </div>
+          </div>
         </script>
 
         <script type="text/html" id="dimensionControlTemplate">
-          <a href="#8/accidentsWithInjuries" title="Accidents with Injuries" alt="Accidents with Injuries">
-            <img src="/images/accident-with-injury.png" class="ideograph" />
+          <a href="#collisions-with-injuries" title="Collisions with Injuries" alt="Collisions with Injuries" data-volume="8">
+            <img src="/images/collision-with-injury.png" class="ideograph" />
           </a>
-          <a href="#2/accidents" title="Accidents" alt="Accidents">
-            <img src="/images/accident.png" class="ideograph" />
+          <a href="#collisions" title="Collisions" alt="Collisions" data-volume="2">
+            <img src="/images/collision.png" class="ideograph" />
           </a>
-          <a href="#1/involved" title="People Involved" alt="People Involved">
+          <a href="#involved" title="People Involved" alt="People Involved" data-volume="1">
             <img src="/images/involved.png" class="ideograph" />
           </a>
 
           <div class="dimension-spacer">&nbsp;</div>
 
-          <a href="#20/pedestr/injured" title="Pedestrian" alt="Pedestrian">
+          <a href="#pedestrians-injured" title="Pedestrians Injured" alt="Pedestrians Injured" data-volume="20">
             <img src="/images/pedestrian.png" class="ideograph" />
           </a>
-          <a href="#40/cyclists/injured" title="Cyclist" alt="Cyclist">
+          <a href="#cyclists-injured" title="Cyclists Injured" alt="Cyclist Injured" data-volume="40">
             <img src="/images/cyclist.png" class="ideograph" />
           </a>
-          <a href="#20/passengers/injured" title="Passenger" alt="Passenger">
+          <a href="#passengers-injured" title="Passengers Injured" alt="Passengers Injured" data-volume="20">
             <img src="/images/passenger.png" class="ideograph" />
           </a>
-          <a href="#20/motorists/injured" title="Motorist" alt="Motorist">
+          <a href="#motorists-injured" title="Motorist" alt="Motorist" data-volume="20">
             <img src="/images/motorist.png" class="ideograph" />
           </a>
         </script>
@@ -58,12 +84,12 @@
             <div class="data">
               <table>
                 <tr>
-                  <th><img src="/images/accident-with-injury.png" title="Accidents with Injuries" alt="Accidents with Injuries" class="ideograph" /></th>
-                  <td>{{accidentsWithInjuries}}</td>
+                  <th><img src="/images/collision-with-injury.png" title="Collisions with Injuries" alt="Collisions with Injuries" class="ideograph" /></th>
+                  <td>{{collisionsWithInjuries}}</td>
                 </tr>
                 <tr>
-                  <th><img src="/images/accident.png" title="Accidents" alt="Accidents" class="ideograph" /></th>
-                  <td>{{accidents}}</td>
+                  <th><img src="/images/collision.png" title="Collisions" alt="Collisions" class="ideograph" /></th>
+                  <td>{{collisions}}</td>
                 </tr>
                 <tr>
                   <th><img src="/images/involved.png" title="People Involved" alt="People Involved" class="ideograph" /></th>

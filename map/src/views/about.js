@@ -31,6 +31,26 @@ LetsMap.AboutView = Backbone.View.extend({
      * @this {LetsMap.AboutView}
      */
     render: function () {
+        $(window).on('keydown', _.bind(function (evt) {
+            if (evt.keyCode === 13 || evt.keyCode === 27) {
+                this.dismiss();
+            }
+        }, this));
         this.$el.html(Mustache.render(this.tmpl.html(), {}));
+        $('#aboutDismiss', this.$el).click(_.bind(function (evt) {
+            evt.preventDefault();
+            this.dismiss();
+            return false;
+        }, this));
+        this.$el.click(_.bind(function (evt) {
+            if (evt.target === this.$el[0]) {
+                this.dismiss();
+            }
+        }, this));
+        return this;
+    },
+
+    dismiss: function () {
+        this.$el.fadeOut();
     }
 });
