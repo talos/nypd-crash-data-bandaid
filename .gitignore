@@ -4,7 +4,7 @@ map/public/data
 config.ini
 tmp/
 *.pyc
-map/public/js
+map/build
 map/node_modules
 public/feed.xml
 .s3cfg

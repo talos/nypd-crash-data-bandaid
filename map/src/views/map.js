@@ -50,6 +50,7 @@ LetsMap.MapView = Backbone.View.extend({
         this._markers = L.markerClusterGroup({
             disableClusteringAtZoom: 16,
             showCoverageOnHover: false,
+            deferredStep: 1000,
             maxClusterRadius: 30,
             zoomToBoundsOnClick: false,
             animateAddingMarkers: false,

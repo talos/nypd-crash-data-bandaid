@@ -477,7 +477,7 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 
 			//Make things appear on the map
 			self._topClusterLevel._recursivelyAddChildrenToMap(null, self._zoom, self._currentShownBounds);
-		});
+		}, this.options.deferredStep || 10);
 	},
 
 	//Overrides FeatureGroup.onRemove
@@ -727,8 +727,8 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 	},
 
 	// Add layers that were deferred in _addLayer
-	_addAllDeferredLayers: function (callback) {
-		this._addDeferredLayers(0, 300, this._deferredLayersToAdd.length, callback);
+	_addAllDeferredLayers: function (callback, step) {
+		this._addDeferredLayers(0, step, this._deferredLayersToAdd.length, callback);
 	},
 
 	_addDeferredLayers: function (start, step, max, callback) {
