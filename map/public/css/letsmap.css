@@ -47,6 +47,7 @@ a:active {
 
 #app #map * .popup .data {
     text-align: center;
+    white-space: nowrap;
 }
 
 #app #map * .popup .data table {
