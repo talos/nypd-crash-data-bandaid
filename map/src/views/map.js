@@ -279,6 +279,22 @@ LetsMap.MapView = Backbone.View.extend({
         });
     },
 
+    triggerViewChange: function (year, month) {
+        var sliderValue,
+            zoom = this._map.getZoom(),
+            center = this._map.getCenter();
+        if (!year || !month) {
+            sliderValue = this._slider.getValue();
+            year = sliderValue.year;
+            month = sliderValue.month;
+        }
+        this.trigger('changeview', year, month,
+                     this._baseLayerName, this._dimensionControl.dimension,
+                     this._dimensionControl.volume, zoom,
+                     center.lat, center.lng);
+
+    },
+
     /**
      * @this {LetsMap.AppView}
      */
@@ -329,6 +345,10 @@ LetsMap.MapView = Backbone.View.extend({
                 position: 'topleft'
             }).addTo(this._map);
 
+            var linkControl = this._linkControl = new LetsMap.LinkControl({
+                position: 'topleft'
+            }).addTo(this._map);
+
             var dimensionControl = this._dimensionControl = new LetsMap.DimensionControl({
                 position: 'topright',
                 dimension: newDimension,
@@ -340,13 +360,8 @@ LetsMap.MapView = Backbone.View.extend({
                     this._baseLayerName = e.name;
                 }
                 var sliderValue = slider.getValue(),
-                    zoom = this._map.getZoom(),
-                    center = this._map.getCenter(),
                     force = true;
-                this.trigger('changeview', sliderValue.year, sliderValue.month,
-                             this._baseLayerName, dimensionControl.dimension,
-                             dimensionControl.volume, zoom,
-                             center.lat, center.lng);
+                this.triggerViewChange();
                 if (e.type === 'moveend') {
                     this._revalidateVisibleMarkers();
                     force = false;
@@ -357,9 +372,7 @@ LetsMap.MapView = Backbone.View.extend({
             this._map.on('slide', _.bind(function (e) {
                 var zoom = this._map.getZoom(),
                     center = this._map.getCenter();
-                this.trigger('changeview', e.year, e.month, this._baseLayerName,
-                             dimensionControl.dimension, dimensionControl.volume,
-                             zoom, center.lat, center.lng);
+                this.triggerViewChange(e.year, e.month);
                 var popup = this._curPopup;
                 if (popup) {
                     popup.setContent(Mustache.render(popupTemplate, {

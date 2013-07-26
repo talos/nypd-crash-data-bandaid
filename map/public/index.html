@@ -7,11 +7,16 @@
         <link rel="stylesheet" href="/css/MarkerCluster.css" />
         <link rel="stylesheet" href="/css/MarkerCluster.Default.css" />
         <link rel="stylesheet" href="/css/smoothness/jquery-ui-1.10.3.custom.css" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta property="og:title" content="NYC Crashmapper" />
+        <meta property="og:description" content="Visualize years of collision data at the intersection level in NYC." />
+        <meta property="og:image" content="/favicon.ico" />
 
         <script type="text/html" id="sliderTemplate">
           <div id="slider-current">
             <span class="time"></span>: <span class="layer"></span>
           </div>
+          <div class="help">Travel through time ↓</div>
           <div id="slider-min"></div><div id="slider"></div><div id="slider-max"></div>
         </script>
 
@@ -22,12 +27,11 @@
               <a href="http://nypd.openscrape.com" target="_blank">intersection-level collision data</a> on a map of NYC.
             </div>
             <div>
-              The slider at the bottom changes which month of data are on
-              the map.
+              The slider at the bottom changes the month of data displayed.
             </div>
             <div>
-              The buttons on the right change which sorts of collisions
-              are colored on the map.  Hover over a button to find out what it
+              The buttons on the right change the collisions
+              colored on the map.  Hover over a button to find out what it
               means.
             </div>
             <div>
@@ -35,45 +39,83 @@
               of collisions that happened there.
             </div>
             <div>
-              The buttons on the top left let you change the base map.
+              Change the base map using the button on the top left.
             </div>
             <div>
-              To share a map, simply copy the location.
+              Use the link button on the left to share the map, or copy the URL.
             </div>
-
             <div style="text-align:center;">
               <button type="button" class="ui-widget" id="aboutDismiss" alt="OK" title="OK">OK</button>
             </div>
+            <div>
+              <small>
+              Map produced by <a href="http://blog.accursedware.com" target="_blank">John Krauss</a>.
+              Find me on <a href="https://twitter.com/recessionporn" target="_blank">Twitter</a>
+              and <a href="https://github.com/talos" target="_blank">Github</a>.  All code is
+              <a href="https://github.com/talos/nypd-crash-data-bandaid" target="_blank">free and
+              open source</a>.
+              </small>
+            </div>
+            <div>
+              <small>
+                This map has been tested on new versions of
+                <a href="https://mozilla.org/firefox" target="_blank">Firefox</a>,
+                <a href="http://www.google.com/chrome" target="_blank">Chrome</a>,
+                and <a href="https://www.apple.com/safari/">Safari</a>.  Try
+                other browsers at your own risk.
+              </small>
+            </div>
+
           </div>
         </script>
 
         <script type="text/html" id="helpControlTemplate">
+          <div class="help">← Help</div>
           <a href="#help" title="Help" alt="Help">?</a>
+        </script>
+
+        <script type="text/html" id="linkControlTemplate">
+          <div class="help">← Link &amp; Share</div>
+          <a href="#link" title="Link and Share" alt="Link and Share" id="link-button">
+            <img src="/images/link.png" class="ideograph" />
+          </a>
+          <div class="link-popup">
+            Link: <input class="link-input"></input><br />
+            Share: <a href="https://twitter.com/share?url=http://nyc.crashmapper.com&text=Visualize+years+of+collision+data+at+the+intersection+level+in+NYC." class="twitter-share-button" data-via="recessionporn">Tweet</a>
+            <div class="fb-like" data-href="http://nyc.crashmapper.com/" data-send="true" data-layout="button_count" data-width="200" data-show-faces="false"></div>
+          </div>
         </script>
 
         <script type="text/html" id="dimensionControlTemplate">
           <a href="#collisions-with-injuries" title="Collisions with Injuries" alt="Collisions with Injuries" data-volume="8">
+            <div class="help">Collisions with Injuries →</div>
             <img src="/images/collision-with-injury.png" class="ideograph" />
           </a>
           <a href="#collisions" title="Collisions" alt="Collisions" data-volume="2">
+            <div class="help">Collisions →</div>
             <img src="/images/collision.png" class="ideograph" />
           </a>
           <a href="#involved" title="People Involved" alt="People Involved" data-volume="1">
+            <div class="help">People involved →</div>
             <img src="/images/involved.png" class="ideograph" />
           </a>
 
           <div class="dimension-spacer">&nbsp;</div>
 
           <a href="#pedestrians-injured" title="Pedestrians Injured" alt="Pedestrians Injured" data-volume="20">
+            <div class="help">Pedestrians injured →</div>
             <img src="/images/pedestrian.png" class="ideograph" />
           </a>
           <a href="#cyclists-injured" title="Cyclists Injured" alt="Cyclist Injured" data-volume="40">
+            <div class="help">Cyclists injured →</div>
             <img src="/images/cyclist.png" class="ideograph" />
           </a>
           <a href="#passengers-injured" title="Passengers Injured" alt="Passengers Injured" data-volume="20">
+            <div class="help">Passengers injured →</div>
             <img src="/images/passenger.png" class="ideograph" />
           </a>
-          <a href="#motorists-injured" title="Motorist" alt="Motorist" data-volume="20">
+          <a href="#motorists-injured" title="Motorists Injured" alt="Motorists Injured" data-volume="20">
+            <div class="help">Motorists injured →</div>
             <img src="/images/motorist.png" class="ideograph" />
           </a>
         </script>
@@ -163,5 +205,14 @@
           ga('send', 'pageview');
 
         </script>
+        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+        <div id="fb-root"></div>
+        <script>(function(d, s, id) {
+          var js, fjs = d.getElementsByTagName(s)[0];
+          if (d.getElementById(id)) return;
+          js = d.createElement(s); js.id = id;
+          js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=618935741458383";
+          fjs.parentNode.insertBefore(js, fjs);
+          }(document, 'script', 'facebook-jssdk'));</script>
     </body>
 </html>

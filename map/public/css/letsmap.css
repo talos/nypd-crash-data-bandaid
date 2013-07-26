@@ -97,6 +97,11 @@ a:active {
     background: #bbb;
 }
 
+#app #map .dimension-control a .help {
+    right: 40px;
+    text-align: right;
+}
+
 #app #map .dimension-control .dimension-spacer {
     background-color: #fff;
     border-bottom: 1px solid #ccc;
@@ -104,6 +109,42 @@ a:active {
 
 #app #map .help-control {
     font-size: 150%;
+}
+
+#app #map .help-control .help {
+    font-size: 66%;
+    left: 30px;
+}
+
+#app #map .link-control a {
+    text-align:center;
+}
+
+#app #map .link-control .help {
+    left: 30px;
+}
+
+#app #map .link-control a img {
+    max-height: 20px;
+    max-width: 20px !important;
+}
+
+#app #map .link-control .link-popup {
+    white-space: nowrap;
+    background: white;
+    background: white;
+    box-shadow: 0 1px 7px rgba(0,0,0,0.65);
+    -webkit-border-radius: 4px;
+            border-radius: 4px;
+    padding: 8px 5px 5px 5px;
+    display: inline-block;
+    position: absolute;
+    top: 0px;
+    left: 30px;
+}
+
+#app #map .link-control .link-popup .link-input {
+    width: 280px;
 }
 
 #app #map .slider-control {
@@ -117,7 +158,12 @@ a:active {
     position: relative;
 }
 
-#app #map .slider-control div {
+#app #map .slider-control .help {
+    top: -30px;
+    font-size: 150%;
+}
+
+#app #map .slider-control #slider-min,#slider-max,#slider-current,#slider {
     display: inline-block;
     margin: 0 5px 0 5px;
 }
@@ -158,3 +204,14 @@ a:active {
     top: -33px;
 }
 
+#app * .help {
+    display: none;
+    position: absolute;
+    background: black;
+    color: white;
+    box-shadow: 0 1px 7px rgba(0,0,0,0.65);
+    -webkit-border-radius: 4px;
+            border-radius: 4px;
+    padding: 0 1em 0 1em;
+    white-space: nowrap;
+}

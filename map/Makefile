@@ -5,7 +5,7 @@ clean:
 
 compile: clean
 	mkdir -p build/js
-	cp -R public/css public/images public/index.html public/data build/
+	cp -R public/css public/images public/index.html public/favicon.ico public/data build/
 	cp -R lib build/js/
 	cat src/letsmap.js \
 	    src/routers/* \
@@ -31,10 +31,12 @@ deploy: compile gzip
 		sync build/css/ s3://nyc.crashmapper.com/css/
 	s3cmd --config=.s3cfg --acl-public --delete-removed --exclude=.DS_Store \
 		sync build/images/ s3://nyc.crashmapper.com/images/
+	s3cmd --config=.s3cfg --acl-public \
+		put build/favicon.ico s3://nyc.crashmapper.com/favicon.ico
+	s3cmd --config=.s3cfg --acl-public \
+		--add-header "Content-Encoding:gzip" \
+		put build/index.html s3://nyc.crashmapper.com/index.html
 	s3cmd --config=.s3cfg --acl-public\
 		--add-header "Content-Encoding:gzip" \
 		--add-header "Content-Type:application/json" \
 		put build/data/collisions.json.gz s3://nyc.crashmapper.com/data/collisions.json.gz
-	s3cmd --config=.s3cfg --acl-public \
-		--add-header "Content-Encoding:gzip" \
-		put build/index.html s3://nyc.crashmapper.com/index.html

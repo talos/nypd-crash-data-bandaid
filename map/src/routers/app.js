@@ -35,6 +35,7 @@ LetsMap.AppRouter = Backbone.Router.extend({
     },
 
     routes: {
+        '': 'root',
         'about': 'about',
         ':year/:month/:base/:dimension/:volume/:zoom/:lat/:lng': 'map',
         '*notFound': 'notFound',
@@ -53,6 +54,14 @@ LetsMap.AppRouter = Backbone.Router.extend({
         if (!this.view.map._map) {
             this.view.map.render();
         }
-        this.view.about.$el.fadeIn();
+        this.view.about.display();
+    },
+
+    root: function () {
+        if (!this.view.map._map) {
+            this.navigate('about', {trigger: true});
+        } else {
+            this.view.map.triggerViewChange();
+        }
     }
 });

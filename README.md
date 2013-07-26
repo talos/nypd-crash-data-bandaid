@@ -2,7 +2,7 @@
 
 NYPD traffic collision [data][] has a booboo. This eases the pain.
 
-  [data]: http://www.nyc.gov/html/nypd/html/traffic_reports/motor_vehicle_accident_data.shtml
+  [data]: http://www.nyc.gov/html/nypd/html/traffic_reports/motor_vehicle_collision_data.shtml
 
 > Council Member Jessica Lappin got into an animated discussion with
 > Petito over traffic crash data. When Lappin asked why NYPD is
@@ -20,6 +20,9 @@ NYPD traffic collision [data][] has a booboo. This eases the pain.
 
 Want to automatically download the latest NYPD traffic crash data as a
 CSV instead of hard-to-interpret Excel file?  Done!
+
+Want to visualize collision data and break it down intersection by
+intersection?  [Done](http://nyc.crashmapper.com)!
 
 ## Installation
 
@@ -53,7 +56,7 @@ missing older data, the raw violations files, and the full list of violations
 URLs.
 
 Thanks to Tom Swanson for his invaluable help in geocoding the vast majority of
-intersections.
+intersections. Check out his [maps](http://bit.ly/11ecHc5)!
 
 ## Just give me the data already!
 
@@ -66,6 +69,8 @@ Historical data will be kept there, too.  Watch the [RSS feed][]!
   [RSS feed]: http://nypd.openscrape.com/data/feed.xml
 
 ## I wanna API! I wanna make mashups!
+
+Check out [Crashmapper](http://nyc.crashmapper.com).
 
 Data's there.  I'm not stopping you. ;)
 

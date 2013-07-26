@@ -50,7 +50,14 @@ LetsMap.AboutView = Backbone.View.extend({
         return this;
     },
 
+    display: function () {
+        this.$el.fadeIn();
+        $('.help').fadeIn();
+    },
+
     dismiss: function () {
         this.$el.fadeOut();
+        $('.help').fadeOut();
+        LetsMap.router.navigate('', {trigger: true});
     }
 });
