@@ -30,12 +30,18 @@ a:active {
     margin-top: 2em;
     margin-left: auto;
     margin-right: auto;
-    width: 500px;
+    width: 600px;
+    overflow-y: scroll;
     padding: 1em;
     background: white;
     box-shadow: 0 1px 7px rgba(0,0,0,0.65);
     -webkit-border-radius: 4px;
     border-radius: 4px;
+    max-height: 90%;
+}
+
+#app #about .about-container ul li {
+    list-style-type: square;
 }
 
 #app #about .about-container div {
