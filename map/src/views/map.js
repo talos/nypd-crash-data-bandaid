@@ -47,28 +47,12 @@ Crashmapper.MapView = Backbone.View.extend({
         this._markers = L.markerClusterGroup({
             disableClusteringAtZoom: 16,
             showCoverageOnHover: false,
-            deferredStep: 1000,
+            fps: 24,
             maxClusterRadius: 30,
             zoomToBoundsOnClick: false,
             animateAddingMarkers: false,
             zoomAnimation: false,
-            iconCreateFunction: function (cluster) {
-                // Aggregate data for cluster once and memo it
-                if (!cluster._data) {
-                    var markers = cluster.getAllChildMarkers();
-                    cluster._data = Crashmapper.Marker.prototype._aggregateData(markers);
-                    cluster._markerCount = markers.length;
-                    cluster._streetName = markers[0].options.icon.options.streetName;
-                }
-                return new Crashmapper.Icon({
-                    marker: cluster,
-                    data: cluster._data,
-                    streetName: cluster._streetName,
-                    aggregate: true,
-                    count: cluster._markerCount,
-                    latlng: cluster._latlng
-                });
-            }
+            iconCreateFunction: this._iconCreateFunction
         }).on('addinglayers', _.bind(function (data) {
             this.showProgress('Generating heatmap', data.added, data.total);
         }, this)).on('addedlayers', _.bind(function () {
@@ -88,6 +72,48 @@ Crashmapper.MapView = Backbone.View.extend({
             .appendTo(this.$el);
     },
 
+    _iconCreateFunction: function (cluster) {
+        // Aggregate data for cluster once and memo it
+        if (!cluster._data) {
+            var markers = cluster.getAllChildMarkers();
+            cluster._data = Crashmapper.Marker.prototype._aggregateData(markers);
+            cluster._markerCount = markers.length;
+            cluster._streetName = markers[0].options.icon.options.streetName;
+        }
+        return new Crashmapper.Icon({
+            marker: cluster,
+            data: cluster._data,
+            streetName: cluster._streetName,
+            aggregate: true,
+            count: cluster._markerCount,
+            latlng: cluster._latlng
+        });
+    },
+
+    _createMarkers: function (data, i, dataLen) {
+        var layers = [],
+            start = new Date();
+        while (i < dataLen) {
+            layers.push(new Crashmapper.Marker(data[i]));
+            // Only bother checking dates after 100 layers added
+            if (i % 100 === 0) {
+                // Ensure 20fps while loading
+                if (new Date() - start > 100) {
+                    break;
+                }
+            }
+            i += 1;
+        }
+        this._markers.addLayers(layers);
+        this.showProgress("Processing data", i, dataLen);
+        if (i >= dataLen) {
+            this._map.addLayer(this._markers);
+        } else {
+            // continue deferred loop
+            _.defer(_.bind(this._createMarkers, this), data, i, dataLen);
+        }
+    },
+
     /**
      * Load markers via XHR.
      *
@@ -100,25 +126,7 @@ Crashmapper.MapView = Backbone.View.extend({
         }
         var $xhr = $.getJSON(dataFile, _.bind(function (data) {
             //data = data.slice(0, 3000);
-            var dataLen = data.length,
-                added = 0,
-                step = 500,
-                createMarkers = _.bind(function (data, start) {
-                    this._markers.addLayers(_.map(data.slice(start, start + step), function (v) {
-                        return new Crashmapper.Marker(v);
-                    }));
-                    added += step;
-                    if (added % 5000 === 0) {
-                        this.showProgress("Processing data", added, dataLen);
-                    }
-                    if (added >= dataLen) {
-                        this._map.addLayer(this._markers);
-                    } else {
-                        // continue deferred loop
-                        _.defer(createMarkers, data, start + step);
-                    }
-                }, this);
-            createMarkers(data, 0);
+            this._createMarkers(data, 0, data.length);
         }, this));
         var loadInterval = setInterval(_.bind(function () {
             var contentLength = $xhr.getResponseHeader('Content-Length'),

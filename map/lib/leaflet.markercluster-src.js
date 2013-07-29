@@ -477,7 +477,7 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 
 			//Make things appear on the map
 			self._topClusterLevel._recursivelyAddChildrenToMap(null, self._zoom, self._currentShownBounds);
-		}, this.options.deferredStep || 10);
+		}, 1000 / (this.options.fps || 24));
 	},
 
 	//Overrides FeatureGroup.onRemove
@@ -727,24 +727,31 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 	},
 
 	// Add layers that were deferred in _addLayer
-	_addAllDeferredLayers: function (callback, step) {
-		this._addDeferredLayers(0, step, this._deferredLayersToAdd.length, callback);
+	_addAllDeferredLayers: function (callback, interval) {
+		this._addDeferredLayers(0, interval, this._deferredLayersToAdd.length, callback);
 	},
 
-	_addDeferredLayers: function (start, step, max, callback) {
+	_addDeferredLayers: function (i, interval, max, callback) {
 		var self = this,
-			stop = step + start > max ? max : step + start;
-		for (var i = start; i < stop; i++) {
+			now = new Date();
+		for (i; i < max; i++) {
 			this._addLayer.apply(this, this._deferredLayersToAdd[i]);
+			if (i % 10 === 0) {
+				// Break out of loop to update if more time has passed than
+				// interval.
+				if (new Date() - now > interval) {
+					break;
+				}
+			}
 		}
-		this.fire('addinglayers', {added: stop, total: max});
-		if (stop === max) {
+		this.fire('addinglayers', {added: i, total: max});
+		if (i === max) {
 			this._deferredLayersToAdd = [];
 			callback();
 			this.fire('addedlayers');
 		} else {
 			setTimeout(function () {
-				self._addDeferredLayers(start + step, step, max, callback);
+				self._addDeferredLayers(i, interval, max, callback);
 			}, 1);
 		}
 	},

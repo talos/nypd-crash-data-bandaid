@@ -31,14 +31,16 @@ Crashmapper.Marker = L.Marker.extend({
     options: {
     },
 
+    _categories: ['cyclists', 'motorists', 'passengers', 'pedestrians', 'total'],
+
     /**
      * @param {Object} data
      * @this {L.Marker}
      */
     initialize: function (data) {
-        this._data = this._processData(data.slice(4));
-        var streetName = data[2] + ' and ' + data[3];
-        var latlng = new L.LatLng(data[0], data[1]);
+        var latlng = new L.LatLng(data.shift(), data.shift());
+        var streetName = data.shift() + ' and ' + data.shift();
+        this._data = this._processData(data);
 
         L.Marker.prototype.initialize.call(this, latlng);
         this.options.icon = new Crashmapper.Icon({
@@ -58,8 +60,7 @@ Crashmapper.Marker = L.Marker.extend({
      */
     _processData: function (data) {
         var processedData = [],
-            categories = ['cyclists', 'motorists', 'passengers', 'pedestrians',
-                'total'],
+            categories = this._categories,
             i,
             j,
             d,
@@ -109,7 +110,6 @@ Crashmapper.Marker = L.Marker.extend({
      * Shared function to aggregate data across many markers.
      */
     _aggregateData: function (markers) {
-        // About 8 seconds for 30K markers
         return _.reduce(markers, this._aggregateSingleMarker, []);
         // post-process into array for templating
         /*aggregated.other = _.map(aggregated.other, function (v, k) {
@@ -121,7 +121,12 @@ Crashmapper.Marker = L.Marker.extend({
     },
 
     _aggregateSingleMarker: function (memo, m) {
-        _.each(m._data, function (d, i) {
+        var i = 0,
+            data = m._data,
+            len = data.length,
+            d;
+        for (i; i < len; i += 1) {
+            d = data[i];
             if (!memo[i]) {
                 memo[i] = {
                     collisionsWithInjuries: 0,
@@ -202,7 +207,7 @@ Crashmapper.Marker = L.Marker.extend({
             /*_.each(d.other, function (v, k) {
                 dm.other[k] = dm.other[k] ? dm.other[k] + v : v;
             });*/
-        });
+        }
         return memo;
     }
 });
