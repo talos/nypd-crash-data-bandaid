@@ -42,6 +42,12 @@ And run the shell script:
 
 You can even adapt the sample cronjob to run the script daily.
 
+## Hacking
+
+There's lots'o'work to be done!  Check out the [TODO][].
+
+  [TODO]: https://github.com/talos/nypd-crash-data-bandaid/blob/master/TODO.md
+
 ## Credit
 
 Thanks to David Turner for writing the original scrapeintersections.py
