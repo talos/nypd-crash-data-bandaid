@@ -1,5 +1,3 @@
-VERSION=v1
-
 clean:
 	rm -rf build/*
 
@@ -21,22 +19,31 @@ gzip:
 	find build/css -type f -exec gzip {} \; -exec mv {}.gz {} \;
 	gzip build/index.html && mv build/index.html.gz build/index.html
 
-# Deploy to S3
-deploy: compile gzip
+prod-bucket:
+	$(eval BUCKET = s3://nyc.crashmapper.com)
+
+staging-bucket:
+	$(eval BUCKET = s3://staging.nyc.crashmapper.com)
+
+s3: compile gzip
 	s3cmd --config=.s3cfg --acl-public --delete-removed --exclude=.DS_Store \
 		--add-header "Content-Encoding:gzip" \
-		sync build/js/ s3://nyc.crashmapper.com/js/
+		sync build/js/ ${BUCKET}/js/
 	s3cmd --config=.s3cfg --acl-public --delete-removed --exclude=.DS_Store \
 		--add-header "Content-Encoding:gzip" \
-		sync build/css/ s3://nyc.crashmapper.com/css/
+		sync build/css/ ${BUCKET}/css/
 	s3cmd --config=.s3cfg --acl-public --delete-removed --exclude=.DS_Store \
-		sync build/images/ s3://nyc.crashmapper.com/images/
+		sync build/images/ ${BUCKET}/images/
 	s3cmd --config=.s3cfg --acl-public \
-		put build/favicon.ico s3://nyc.crashmapper.com/favicon.ico
+		put build/favicon.ico ${BUCKET}/favicon.ico
 	s3cmd --config=.s3cfg --acl-public \
 		--add-header "Content-Encoding:gzip" \
-		put build/index.html s3://nyc.crashmapper.com/index.html
+		put build/index.html ${BUCKET}/index.html
 	s3cmd --config=.s3cfg --acl-public\
 		--add-header "Content-Encoding:gzip" \
 		--add-header "Content-Type:application/json" \
-		put build/data/collisions.json.gz s3://nyc.crashmapper.com/data/collisions.json.gz
+		put build/data/collisions.json.gz ${BUCKET}/data/collisions.json.gz
+
+stage: staging-bucket s3
+
+deploy: prod-bucket s3
