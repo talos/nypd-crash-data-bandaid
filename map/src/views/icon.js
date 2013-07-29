@@ -1,32 +1,31 @@
 /***
-   * Copyright (c) 2012 John Krauss.
+   * Copyright (c) 2013 John Krauss.
    *
-   * This file is part of letsmap.
+   * This file is part of Crashmapper.
    *
-   * letsmap is free software: you can redistribute it and/or modify
+   * Crashmapper is free software: you can redistribute it and/or modify
    * it under the terms of the GNU General Public License as published by
    * the Free Software Foundation, either version 3 of the License, or
    * (at your option) any later version.
    *
-   * letsmap is distributed in the hope that it will be useful,
+   * Crashmapper is distributed in the hope that it will be useful,
    * but WITHOUT ANY WARRANTY; without even the implied warranty of
    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    * GNU General Public License for more details.
    *
    * You should have received a copy of the GNU General Public License
-   * along with letsmap.  If not, see <http://www.gnu.org/licenses/>.
+   * along with Crashmapper.  If not, see <http://www.gnu.org/licenses/>.
    *
    ***/
 
-/*jslint browser: true, nomen: true*/
-/*globals Backbone, $, LetsMap, Mustache, L, _*/
-"use strict";
+/*jslint browser: true, nomen: true, sloppy: true*/
+/*globals $, Crashmapper, L, _*/
 
 /**
  * @constructor
  * @extends L.Icon
  */
-LetsMap.Icon = L.DivIcon.extend({
+Crashmapper.Icon = L.DivIcon.extend({
     options: {
         iconSize: new L.Point(0, 0),
         className: 'intersection-marker'
@@ -41,9 +40,7 @@ LetsMap.Icon = L.DivIcon.extend({
         var div,
             $div,
             marker = this.options.marker,
-            popup,
-            self = this;
-            //template = this._template.html();
+            popup;
 
         // call parent method explicitly
         div = L.DivIcon.prototype.createIcon.call(this);
@@ -55,7 +52,7 @@ LetsMap.Icon = L.DivIcon.extend({
             $div.addClass('single');
         }
 
-        this.$subDiv = $('<div />').appendTo($div.data('letsmap', {
+        this.$subDiv = $('<div />').appendTo($div.data('crashmapper', {
             data: this.options.data,
             count: this.options.count
         }));

@@ -5,11 +5,12 @@ compile: clean
 	mkdir -p build/js
 	cp -R public/css public/images public/index.html public/favicon.ico public/data build/
 	cp -R lib build/js/
-	cat src/letsmap.js \
+	cat src/header.js \
+	    src/crashmapper.js \
 	    src/routers/* \
 	    src/views/* \
-	    > build/js/letsmap.js
-	#uglifyjs -c -b -o public/js/letsmap.min.js public/js/letsmap.js
+	    src/footer.js \
+	    > build/js/crashmapper.js
 
 host: compile
 	cd build && python -m SimpleHTTPServer 8000

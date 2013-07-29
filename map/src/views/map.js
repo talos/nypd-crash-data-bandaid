@@ -1,39 +1,37 @@
 /***
-   * Copyright (c) 2012 John Krauss.
+   * Copyright (c) 2013 John Krauss.
    *
-   * This file is part of letsmap.
+   * This file is part of Crashmapper.
    *
-   * letsmap is free software: you can redistribute it and/or modify
+   * Crashmapper is free software: you can redistribute it and/or modify
    * it under the terms of the GNU General Public License as published by
    * the Free Software Foundation, either version 3 of the License, or
    * (at your option) any later version.
    *
-   * letsmap is distributed in the hope that it will be useful,
+   * Crashmapper is distributed in the hope that it will be useful,
    * but WITHOUT ANY WARRANTY; without even the implied warranty of
    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    * GNU General Public License for more details.
    *
    * You should have received a copy of the GNU General Public License
-   * along with letsmap.  If not, see <http://www.gnu.org/licenses/>.
+   * along with Crashmapper.  If not, see <http://www.gnu.org/licenses/>.
    *
    ***/
 
-/*jslint browser: true, nomen: true, sub: true, vars: true*/
-/*globals Backbone, $, LetsMap, Mustache, L, _, HeatCanvas, STATIC_HOST*/
-"use strict";
+/*jslint browser: true, nomen: true, sub: true, vars: true, sloppy: true*/
+/*globals Backbone, $, Crashmapper, Mustache, L, _ */
 
 /**
  * @param {Object} options
  * @constructor
  * @extends Backbone.View
  */
-LetsMap.MapView = Backbone.View.extend({
+Crashmapper.MapView = Backbone.View.extend({
     id: 'map',
     /**
-     * @this {LetsMap.AppView}
+     * @this {Crashmapper.AppView}
      */
-    initialize: function (options) {
-        /** @type {string} */
+    initialize: function () {
         this.MAP_HOLDER_ID = 'mapHolder';
 
         var $progressBar = this.$progressBar = $('<div />')
@@ -46,7 +44,6 @@ LetsMap.MapView = Backbone.View.extend({
             .attr('id', 'progressbar-text')
             .appendTo($progressBar);
 
-        /** @type {L.MarkerClusterGroup} */
         this._markers = L.markerClusterGroup({
             disableClusteringAtZoom: 16,
             showCoverageOnHover: false,
@@ -59,11 +56,11 @@ LetsMap.MapView = Backbone.View.extend({
                 // Aggregate data for cluster once and memo it
                 if (!cluster._data) {
                     var markers = cluster.getAllChildMarkers();
-                    cluster._data = LetsMap.Marker.prototype._aggregateData(markers);
+                    cluster._data = Crashmapper.Marker.prototype._aggregateData(markers);
                     cluster._markerCount = markers.length;
                     cluster._streetName = markers[0].options.icon.options.streetName;
                 }
-                return new LetsMap.Icon({
+                return new Crashmapper.Icon({
                     marker: cluster,
                     data: cluster._data,
                     streetName: cluster._streetName,
@@ -94,7 +91,7 @@ LetsMap.MapView = Backbone.View.extend({
     /**
      * Load markers via XHR.
      *
-     * @this {LetsMap.AppView}
+     * @this {Crashmapper.AppView}
      */
     _loadMarkers: function () {
         var dataFile = '/data/collisions.json';
@@ -103,21 +100,18 @@ LetsMap.MapView = Backbone.View.extend({
         }
         var $xhr = $.getJSON(dataFile, _.bind(function (data) {
             //data = data.slice(0, 3000);
-            var before = new Date(),
-                dataLen = data.length,
+            var dataLen = data.length,
                 added = 0,
-                i,
                 step = 500,
                 createMarkers = _.bind(function (data, start) {
                     this._markers.addLayers(_.map(data.slice(start, start + step), function (v) {
-                        return new LetsMap.Marker(v);
+                        return new Crashmapper.Marker(v);
                     }));
                     added += step;
                     if (added % 5000 === 0) {
                         this.showProgress("Processing data", added, dataLen);
                     }
                     if (added >= dataLen) {
-                        var before = new Date();
                         this._map.addLayer(this._markers);
                     } else {
                         // continue deferred loop
@@ -151,7 +145,7 @@ LetsMap.MapView = Backbone.View.extend({
      * @param {number} num Numerator of fraction to draw.
      * @param {number} denom Denominator of fraction to draw.
      *
-     * @this {LetsMap.AppView}
+     * @this {Crashmapper.AppView}
      */
     showProgress: function (text, num, denom) {
         if (num && denom) {
@@ -168,7 +162,7 @@ LetsMap.MapView = Backbone.View.extend({
     /**
      * Hide the progress indicator.
      *
-     * @this {LetsMap.AppView}
+     * @this {Crashmapper.AppView}
      */
     hideProgress: function () {
         this.$progressBar.fadeOut().progressbar('disable');
@@ -186,7 +180,7 @@ LetsMap.MapView = Backbone.View.extend({
             var $m = $(m),
                 pos = $m.offset();
             if (pos.left > 0 && pos.top > 0 && pos.left < width && pos.top < height) {
-                self._visibleMarkers.push([$m.children(), $m.data('letsmap')]);
+                self._visibleMarkers.push([$m.children(), $m.data('crashmapper')]);
             }
         });
     },
@@ -224,8 +218,6 @@ LetsMap.MapView = Backbone.View.extend({
         _.each(this._visibleMarkers, function (v) {
             var $m = v[0],
                 data = v[1],
-                intensity,
-                density,
                 cnt = data.count,
                 width,
                 color,
@@ -296,7 +288,7 @@ LetsMap.MapView = Backbone.View.extend({
     },
 
     /**
-     * @this {LetsMap.AppView}
+     * @this {Crashmapper.AppView}
      */
     render: function (newYear, newMonth, newBase, newDimension, newVolume, newZoom, lat, lng) {
         // initial setup
@@ -337,19 +329,19 @@ LetsMap.MapView = Backbone.View.extend({
 
             new L.Control.Layers(baseLayers, [], {position: "topleft"}).addTo(this._map);
             new L.Control.Zoom({position: "topleft"}).addTo(this._map);
-            var slider = this._slider = new LetsMap.Slider({
+            var slider = this._slider = new Crashmapper.Slider({
                 position: "bottomleft"
             }).addTo(this._map);
 
-            var helpControl = this._helpControl = new LetsMap.HelpControl({
+            this._helpControl = new Crashmapper.HelpControl({
                 position: 'topleft'
             }).addTo(this._map);
 
-            var linkControl = this._linkControl = new LetsMap.LinkControl({
+            this._linkControl = new Crashmapper.LinkControl({
                 position: 'topleft'
             }).addTo(this._map);
 
-            var dimensionControl = this._dimensionControl = new LetsMap.DimensionControl({
+            this._dimensionControl = new Crashmapper.DimensionControl({
                 position: 'topright',
                 dimension: newDimension,
                 volume: newVolume
@@ -370,8 +362,6 @@ LetsMap.MapView = Backbone.View.extend({
             }, this));
 
             this._map.on('slide', _.bind(function (e) {
-                var zoom = this._map.getZoom(),
-                    center = this._map.getCenter();
                 this.triggerViewChange(e.year, e.month);
                 var popup = this._curPopup;
                 if (popup) {
@@ -389,12 +379,12 @@ LetsMap.MapView = Backbone.View.extend({
                 var popup = this._curPopup = e.popup;
                 popup.setContent(
                     Mustache.render(popupTemplate, _.extend({}, popup.options, {
-                        data: popup.options.data[slider.getValue().idx],
+                        data: popup.options.data[slider.getValue().idx]
                     }))
                 );
             }, this));
 
-            this._map.on('popupclose', _.bind(function (e) {
+            this._map.on('popupclose', _.bind(function () {
                 this._curPopup = null;
             }, this));
 

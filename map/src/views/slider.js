@@ -1,32 +1,31 @@
 /***
-   * Copyright (c) 2012 John Krauss.
+   * Copyright (c) 2013 John Krauss.
    *
-   * This file is part of letsmap.
+   * This file is part of Crashmapper.
    *
-   * letsmap is free software: you can redistribute it and/or modify
+   * Crashmapper is free software: you can redistribute it and/or modify
    * it under the terms of the GNU General Public License as published by
    * the Free Software Foundation, either version 3 of the License, or
    * (at your option) any later version.
    *
-   * letsmap is distributed in the hope that it will be useful,
+   * Crashmapper is distributed in the hope that it will be useful,
    * but WITHOUT ANY WARRANTY; without even the implied warranty of
    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    * GNU General Public License for more details.
    *
    * You should have received a copy of the GNU General Public License
-   * along with letsmap.  If not, see <http://www.gnu.org/licenses/>.
+   * along with Crashmapper.  If not, see <http://www.gnu.org/licenses/>.
    *
    ***/
 
-/*jslint browser: true, nomen: true*/
-/*globals Backbone, $, LetsMap, Mustache, L, _*/
-"use strict";
+/*jslint browser: true, nomen: true, sloppy: true*/
+/*globals $, Crashmapper, L*/
 
 /**
  * @constructor
  * @extends L.Control
  */
-LetsMap.Slider = L.Control.extend({
+Crashmapper.Slider = L.Control.extend({
     options: {
         position: 'bottomleft',
         min: 7,
@@ -46,9 +45,9 @@ LetsMap.Slider = L.Control.extend({
         }).on('slide', function (e, ui) {
             map.fire('slide', self.getValue(ui.value));
             self._updateCurrentDiv(ui.value);
-        }).on('slidestart', function (e) {
+        }).on('slidestart', function () {
             map.dragging.disable();
-        }).on('slidestop', function (e) {
+        }).on('slidestop', function () {
             map.dragging.enable();
         });
         $('a.ui-slider-handle', this.$slider).attr({
@@ -60,9 +59,6 @@ LetsMap.Slider = L.Control.extend({
         this.$currentDiv = $('#slider-current .time', div);
         this._updateCurrentDiv();
         return div;
-    },
-
-    onRemove: function (map) {
     },
 
     _updateCurrentDiv: function (idx) {
