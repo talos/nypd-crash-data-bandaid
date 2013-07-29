@@ -6,6 +6,7 @@ are some outstanding tasks:
 * Mobile block, to advise people against trying to load the map on their cell
   phones.
 * A clearer disclaimer/link to licensing info.
+* Determine end date from loaded data instead of hardcoding it.
 
 ### Bug-fixes
 
@@ -23,6 +24,7 @@ are some outstanding tasks:
 * Allow custom aggregation based off of a drawn shape.
   - Provide some useful pre-made shapes (council districts, CDs, boroughs,
     etc.)
+* Allow automatic zoom-to-area.
 
 ### Infrastructural changes
 
