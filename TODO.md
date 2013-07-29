@@ -10,8 +10,8 @@ are some outstanding tasks:
 
 ### Bug-fixes
 
-* Investigate GH issue #1, and see whether the Excel input script is sometimes
-  dropping certain stats from intersections.
+* __(RESOLVED)__ *Investigate GH issue #1, and see whether the Excel input script is sometimes
+  dropping certain stats from intersections.*
 * Memory profile and fix leaks, particularly in FF.
 
 ### Significant new features
