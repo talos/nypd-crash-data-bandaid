@@ -163,19 +163,19 @@
                 </tr>
                 <tr>
                   <th><img src="/images/injured.png" title="Injured" alt="Injured" class="ideograph" /></th>
-                  <td>           {{#pedestr}}   {{injured}}{{/pedestr}}   {{^pedestr}}    0{{/pedestr}}</td>
-                  <td>+</td><td> {{#cyclists}}  {{injured}}{{/cyclists}}  {{^cyclists}}   0{{/cyclists}}</td>
-                  <td>+</td><td> {{#passengers}}{{injured}}{{/passengers}}{{^passengers}} 0{{/passengers}}</td>
-                  <td>+</td><td> {{#motorists}} {{injured}}{{/motorists}} {{^motorists}}  0{{/motorists}}</td>
-                  <td>=</td><td> {{#total}}     {{injured}}{{/total}}     {{^total}}      0{{/total}}</td>
+                  <td>           {{#pedestrians}}{{injured}}{{/pedestrians}}{{^pedestrians}}0{{/pedestrians}}</td>
+                  <td>+</td><td> {{#cyclists}}   {{injured}}{{/cyclists}}   {{^cyclists}}   0{{/cyclists}}</td>
+                  <td>+</td><td> {{#passengers}} {{injured}}{{/passengers}} {{^passengers}} 0{{/passengers}}</td>
+                  <td>+</td><td> {{#motorists}}  {{injured}}{{/motorists}}  {{^motorists}}  0{{/motorists}}</td>
+                  <td>=</td><td> {{#total}}      {{injured}}{{/total}}      {{^total}}      0{{/total}}</td>
                 </tr>
                 <tr>
                   <th><img src="/images/killed.png" title="Killed" alt="Killed" class="ideograph" /></th>
-                  <td>           {{#pedestr}}    {{killed}}{{/pedestr}}   {{^pedestr}}    0{{/pedestr}}</td>
-                  <td>+</td><td> {{#cyclists}}   {{killed}}{{/cyclists}}  {{^cyclists}}   0{{/cyclists}}</td>
-                  <td>+</td><td> {{#passengers}} {{killed}}{{/passengers}}{{^passengers}} 0{{/passengers}}</td>
-                  <td>+</td><td> {{#motorists}}  {{killed}}{{/motorists}} {{^motorists}}  0{{/motorists}}</td>
-                  <td>=</td><td> {{#total}}      {{killed}}{{/total}}     {{^total}}      0{{/total}}</td>
+                  <td>           {{#pedestrians}}{{killed}}{{/pedestrians}}{{^pedestrians}}0{{/pedestrians}}</td>
+                  <td>+</td><td> {{#cyclists}}   {{killed}}{{/cyclists}}   {{^cyclists}}   0{{/cyclists}}</td>
+                  <td>+</td><td> {{#passengers}} {{killed}}{{/passengers}} {{^passengers}} 0{{/passengers}}</td>
+                  <td>+</td><td> {{#motorists}}  {{killed}}{{/motorists}}  {{^motorists}}  0{{/motorists}}</td>
+                  <td>=</td><td> {{#total}}      {{killed}}{{/total}}      {{^total}}      0{{/total}}</td>
                 </tr>
               </table>
               <!--
