@@ -48,6 +48,6 @@ echo "Committing changes to git..."
 git add ${COLLISIONS_CSV} ${SUMMONS_CSV} ${PUBLIC}/intersections.txt
 git commit -m "$(date): Auto-updating data"
 
-echo "Publishing changes..."
+echo "Publishing changes to staging..."
 ./bandaid/rss.py
-cd map && make deploy
+cd map && make stage
