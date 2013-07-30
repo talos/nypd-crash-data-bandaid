@@ -3,17 +3,16 @@ are some outstanding tasks:
 
 ### Low-hanging fruit
 
-* Mobile block, to advise people against trying to load the map on their cell
-  phones.
+* __(RESOLVED)__ `e766e46` *Mobile block, to advise people against trying to
+  load the map on their cell phones.*
 * A clearer disclaimer/link to licensing info.
 * Determine end date from loaded data instead of hardcoding it.
 
 ### Bug-fixes
 
-* __(RESOLVED)__ `b6c787bfe1a078039f67b9e1846f47684eb215aa`
-  *Investigate GH issue #1, and see whether the Excel input script is sometimes
-  dropping certain stats from intersections.*
-* Memory profile and fix leaks, particularly in FF.
+* __(RESOLVED)__ `b6c787b` *Investigate GH issue #1, and see whether the Excel
+  input script is sometimes dropping certain stats from intersections.*
+* __(RESOLVED)__ `d771a9e` *Memory profile and fix leaks, particularly in FF.*
 
 ### Significant new features
 
