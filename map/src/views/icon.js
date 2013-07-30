@@ -62,7 +62,8 @@ Crashmapper.Icon = L.DivIcon.extend({
             data: this.options.data,
             streetName: this.options.streetName,
             count: this.options.count,
-            aggregate: this.options.aggregate
+            aggregate: this.options.aggregate,
+            maxWidth: 350
         });
 
         marker.bindPopup(this.popup);
