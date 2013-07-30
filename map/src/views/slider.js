@@ -36,6 +36,7 @@ Crashmapper.Slider = L.Control.extend({
         var div = L.DomUtil.create('div', 'slider-control'),
             self = this,
             vals,
+            $slider,
             helpText = 'Drag my handles to change start and end date!';
         div.innerHTML = $('#sliderTemplate').html();
         this.$slider = $('#slider', div).slider({
@@ -43,21 +44,88 @@ Crashmapper.Slider = L.Control.extend({
             min: this.options.min,
             range: true,
             step: true,
+            dragging: true,
             values: (this.options.start && this.options.end) ?
                     [this.options.start, this.options.end] :
                     [this.options.min, this.options.max],
-            animate: true
-        }).on('slide', function (e, ui) {
-            // Have to determine how we figure out which slider moved.
-            map.fire('slide', {
-                start: self.getValue(ui.values[0]),
-                end: self.getValue(ui.values[1])
-            });
-            self._updateCurrentDiv(ui.values[0], ui.values[1]);
+            animate: false
+        }).on('slide', function (evt, ui) {
+            var $slider = $(evt.target),
+                oldValues,
+                dragVal,
+                priorDragVal,
+                dragDiff;
+
+            // Handle a drag on the slider
+            if ($slider.data('slider-dragging') === true) {
+                $slider.children('.ui-slider-handle').removeClass('ui-state-active ui-state-focus').blur();
+
+                oldValues = $slider.slider('values');
+                priorDragVal = $slider.data('slider-dragging-val');
+
+                // Figure out the dragged value
+                if (oldValues[0] !== ui.values[0]) {
+                    dragVal = ui.values[0];
+                } else if (oldValues[1] !== ui.values[1]) {
+                    dragVal = ui.values[1];
+                }
+
+                // If this is a continued drag (rather than the first instance)
+                // possibly manipulate the slider.
+                if (typeof priorDragVal !== 'undefined' && priorDragVal !== dragVal) {
+                    dragDiff = dragVal - priorDragVal;
+
+                    // Only manipulate the slider if this won't violate limits
+                    // (which would change the sliding time)
+                    if (oldValues[0] + dragDiff >= $slider.slider('option', 'min') &&
+                            oldValues[1] + dragDiff <= $slider.slider('option', 'max')) {
+                        $slider.slider('values', 0, oldValues[0] + dragDiff);
+                        $slider.slider('values', 1, oldValues[1] + dragDiff);
+
+                        map.fire('slide', {
+                            start: self.getValue(oldValues[0] + dragDiff),
+                            end: self.getValue(oldValues[1] + dragDiff)
+                        });
+                        self._updateCurrentDiv(oldValues[0] + dragDiff,
+                                               oldValues[1] + dragDiff);
+                    }
+                }
+
+                // Store the dragged value for later.
+                $slider.data('slider-dragging-val', dragVal);
+
+                // Suppress normal operation of the slider.
+                return false;
+            } else {
+                $slider.data('slider-dragging-val', undefined);
+                map.fire('slide', {
+                    start: self.getValue(ui.values[0]),
+                    end: self.getValue(ui.values[1])
+                });
+                self._updateCurrentDiv(ui.values[0], ui.values[1]);
+            }
         }).on('slidestart', function (evt, ui) {
             map.dragging.disable();
-        }).on('slidestop', function () {
+            var $slider = $(evt.target),
+                $origTarget = $(evt.originalEvent.target);
+            // This is a slide on the range, suppress it.
+            if ($origTarget.hasClass('ui-slider-range')) {
+                $slider.data('slider-dragging', true);
+                $slider.data('slider-dragging-val', undefined);
+                $origTarget.addClass('ui-state-active ui-state-focus');
+            }
+        }).on('slidestop', function (evt) {
             map.dragging.enable();
+            var $slider = $(evt.target),
+                $range = $slider.children('.ui-slider-range');
+            $slider.data('slider-dragging', false);
+            $slider.data('slider-dragging-val', undefined);
+            $range.removeClass('ui-state-active ui-state-focus');
+        });
+        this.$slider.children('.ui-slider-range').on('mouseenter', function () {
+            $(this).addClass('ui-state-hover');
+        }).on('mouseleave', function () {
+            $(this).removeClass('ui-state-hover');
         });
         $('a.ui-slider-handle', this.$slider).attr({
             alt: helpText,
