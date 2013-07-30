@@ -183,6 +183,7 @@ a:active {
     left: 420px;
     top: -8px;
     width: 100%;
+    white-space: nowrap;
     text-align: left;
 }
 
