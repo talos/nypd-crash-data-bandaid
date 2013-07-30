@@ -221,3 +221,13 @@ a:active {
     padding: 0 1em 0 1em;
     white-space: nowrap;
 }
+
+.mobile-warning-container {
+    padding: 30px;
+    text-align: center;
+}
+
+.mobile-warning-container img {
+    border: 1px solid black;
+    margin: 15px 0 15px 0;
+}
