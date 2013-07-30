@@ -7,6 +7,8 @@ are some outstanding tasks:
   load the map on their cell phones.*
 * A clearer disclaimer/link to licensing info.
 * Determine end date from loaded data instead of hardcoding it.
+* Explanation in docs of how to read popup layout.
+* Help in-popup to see what it means.
 
 ### Bug-fixes
 
@@ -18,8 +20,8 @@ are some outstanding tasks:
 
 * __(RESOLVED)__ `a5e4a19` *Allowing the selection of a date range, aggregating
   stats within.*
-* Allow for a date range to be dragged in its entirety, rather than just one
-  edge.
+* __(RESOLVED)__ `398fd23` *Allow for a date range to be dragged in its
+  entirety, rather than just one edge.*
 * Providing an interface to view the vehicle type and contributing factor
   overlays.  The data's already loaded in.
 * Display a color-coded legend.
@@ -33,7 +35,8 @@ are some outstanding tasks:
 
 * Tests (!)
 * Implement staging server and nonbreaking push of new features from it.
-* Change crashmapper JS namespace from `Letsmap` to `Crashmapper`.
+* __(RESOLVED)__ `bc8dde4b` *Change crashmapper JS namespace from `Letsmap` to
+  `Crashmapper`.*
 * Possibly refactor crashmapper entirely out of the band-aid (dependencies are
   limited to the data transfer.)
 * Investigate ways to break the data set into several requests while keeping it
