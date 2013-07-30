@@ -67,8 +67,8 @@ Crashmapper.Slider = L.Control.extend({
         $('#slider-max', div).html(this._prettyValue(this.options.max));
         this.$currentStartDiv = $('#slider-current .start-time', div);
         this.$currentEndDiv = $('#slider-current .end-time', div);
-        vals = this.getValues();
-        this._updateCurrentDiv(vals[0].idx, vals[1].idx);
+        this._updateCurrentDiv(this.$slider.slider('values', 0),
+                               this.$slider.slider('values', 1));
         return div;
     },
 
