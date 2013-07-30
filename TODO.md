@@ -16,7 +16,10 @@ are some outstanding tasks:
 
 ### Significant new features
 
-* Allowing the selection of a date range, aggregating stats within.
+* __(RESOLVED)__ `a5e4a19` *Allowing the selection of a date range, aggregating
+  stats within.*
+* Allow for a date range to be dragged in its entirety, rather than just one
+  edge.
 * Providing an interface to view the vehicle type and contributing factor
   overlays.  The data's already loaded in.
 * Display a color-coded legend.
