@@ -26,9 +26,13 @@ Crashmapper.AppRouter = Backbone.Router.extend({
     initialize: function (options) {
         this.view = options.view;
 
-        this.view.map.on('changeview', function (year, month, base, dimension,
-                                                 volume, zoom, lat, lng) {
-            this.navigate([year, month + 1, base.toLowerCase(),
+        this.view.map.on('changeview', function (startYear, startMonth,
+                                                 endYear, endMonth, base,
+                                                 dimension, volume, zoom, lat,
+                                                 lng) {
+            this.navigate([Number(startYear) - 2000, Number(startMonth) + 1,
+                          Number(endYear) - 2000, Number(endMonth) + 1,
+                          base.toLowerCase(),
                           dimension.toLowerCase(), volume, zoom,
                           lat.toPrecision(5), lng.toPrecision(5)].join('/'));
         }, this);
@@ -37,12 +41,26 @@ Crashmapper.AppRouter = Backbone.Router.extend({
     routes: {
         '': 'root',
         'about': 'about',
-        ':year/:month/:base/:dimension/:volume/:zoom/:lat/:lng': 'map',
+        ':year/:month/:base/:dimension/:volume/:zoom/:lat/:lng': 'legacyMap',
+        ':startYear/:startMonth/:endYear/:endMonth/:base/:dimension/:volume/:zoom/:lat/:lng':
+            'map',
         '*notFound': 'notFound'
     },
 
-    map: function (year, month, base, dimension, volume, zoom, lat, lng) {
-        this.view.map.render(year, month - 1, base, dimension, volume, zoom, lat, lng);
+    /**
+     * Reroute pre-multi handle slider to multi-handle slider.
+     */
+    legacyMap: function (year, month, base, dimension, volume, zoom, lat, lng) {
+        this.navigate([Number(year) - 2000, month, Number(year) - 2000, month,
+                      base, dimension, volume, zoom, lat, lng].join('/'),
+                      {trigger: true});
+    },
+
+    map: function (startYear, startMonth, endYear, endMonth, base, dimension,
+                   volume, zoom, lat, lng) {
+        this.view.map.render(Number(startYear) + 2000, Number(startMonth) - 1,
+                             Number(endYear) + 2000, Number(endMonth) - 1,
+                             base, dimension, volume, zoom, lat, lng);
     },
 
     notFound: function () {

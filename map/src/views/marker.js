@@ -18,7 +18,7 @@
    *
    ***/
 
-/*jslint browser: true, nomen: true, vars: true, sloppy: true*/
+/*jslint browser: true, nomen: true, sloppy: true*/
 /*globals Crashmapper, L, _*/
 
 /**
@@ -38,8 +38,8 @@ Crashmapper.Marker = L.Marker.extend({
      * @this {L.Marker}
      */
     initialize: function (data) {
-        var latlng = new L.LatLng(data.shift(), data.shift());
-        var streetName = data.shift() + ' and ' + data.shift();
+        var latlng = new L.LatLng(data[0], data[1]),
+            streetName = data[2] + ' and ' + data[3];
         this._data = this._processData(data);
 
         L.Marker.prototype.initialize.call(this, latlng);
@@ -65,7 +65,7 @@ Crashmapper.Marker = L.Marker.extend({
             j,
             d,
             pd;
-        for (i = 0; i < data.length; i += 1) {
+        for (i = 4; i < data.length; i += 1) {
             d = data[i];
             pd = {
                 collisionsWithInjuries: 0,
@@ -110,7 +110,30 @@ Crashmapper.Marker = L.Marker.extend({
      * Shared function to aggregate data across many markers.
      */
     _aggregateData: function (markers) {
-        return _.reduce(markers, this._aggregateSingleMarker, []);
+        var aggregate = [],
+            t = markers.length - 1,
+            i,
+            data,
+            len,
+            d,
+            dm;
+
+        while (t >= 0) {
+            data = markers[t]._data;
+            len = data.length;
+            for (i = 0; i < len; i += 1) {
+                d = data[i];
+                dm = aggregate[i];
+                if (!dm) {
+                    dm = aggregate[i] = {};
+                }
+                this.addDataPoint(dm, d);
+            }
+
+            t -= 1;
+        }
+
+        return aggregate;
         // post-process into array for templating
         /*aggregated.other = _.map(aggregated.other, function (v, k) {
             return {
@@ -120,95 +143,92 @@ Crashmapper.Marker = L.Marker.extend({
         });*/
     },
 
-    _aggregateSingleMarker: function (memo, m) {
-        var i = 0,
-            data = m._data,
-            len = data.length,
-            d;
-        for (i; i < len; i += 1) {
-            d = data[i];
-            if (!memo[i]) {
-                memo[i] = {
-                    collisionsWithInjuries: 0,
-                    collisions: 0,
-                    involved: 0,
-                    other: {}
+    /**
+     * Fast static function to merge data points together.
+     *
+     * Add 'd' to 'dm'.  Modifies 'dm'.
+     *
+     * Returns nothing.
+     */
+    addDataPoint: function (dm, d) {
+        var dcyclists = d.cyclists,
+            dmotorists = d.motorists,
+            dpassengers = d.passengers,
+            dpedestrians = d.pedestrians,
+            dtotal = d.total,
+            dmcyclists = dm.cyclists,
+            dmmotorists = dm.motorists,
+            dmpassengers = dm.passengers,
+            dmpedestrians = dm.pedestrians,
+            dmtotal = dm.total;
+        dm.collisionsWithInjuries = dm.collisionsWithInjuries ?
+                dm.collisionsWithInjuries + d.collisionsWithInjuries :
+                d.collisionsWithInjuries;
+        dm.collisions = dm.collisions ?
+                dm.collisions + d.collisions :
+                d.collisions;
+        dm.involved = dm.involved ?
+                dm.involved + d.involved :
+                d.involved;
+        if (dcyclists) {
+            if (dmcyclists) {
+                dmcyclists.injured += dcyclists.injured;
+                dmcyclists.killed += dcyclists.killed;
+            } else {
+                dm.cyclists = {
+                    injured: dcyclists.injured,
+                    killed: dcyclists.killed
                 };
             }
-            var dm = memo[i],
-                dcyclists = d.cyclists,
-                dmotorists = d.motorists,
-                dpassengers = d.passengers,
-                dpedestrians = d.pedestrians,
-                dtotal = d.total,
-                dmcyclists = dm.cyclists,
-                dmmotorists = dm.motorists,
-                dmpassengers = dm.passengers,
-                dmpedestrians = dm.pedestrians,
-                dmtotal = dm.total;
-            dm.collisionsWithInjuries += d.collisionsWithInjuries;
-            dm.collisions += d.collisions;
-            dm.involved += d.involved;
-            if (dcyclists) {
-                if (dmcyclists) {
-                    dmcyclists.injured += dcyclists.injured;
-                    dmcyclists.killed += dcyclists.killed;
-                } else {
-                    dm.cyclists = {
-                        injured: dcyclists.injured,
-                        killed: dcyclists.killed
-                    };
-                }
-            }
-            if (dmotorists) {
-                if (dmmotorists) {
-                    dmmotorists.injured += dmotorists.injured;
-                    dmmotorists.killed += dmotorists.killed;
-                } else {
-                    dm.motorists = {
-                        injured: dmotorists.injured,
-                        killed: dmotorists.killed
-                    };
-                }
-            }
-            if (dpassengers) {
-                if (dmpassengers) {
-                    dmpassengers.injured += dpassengers.injured;
-                    dmpassengers.killed += dpassengers.killed;
-                } else {
-                    dm.passengers = {
-                        injured: dpassengers.injured,
-                        killed: dpassengers.killed
-                    };
-                }
-            }
-            if (dpedestrians) {
-                if (dmpedestrians) {
-                    dmpedestrians.injured += dpedestrians.injured;
-                    dmpedestrians.killed += dpedestrians.killed;
-                } else {
-                    dm.pedestrians = {
-                        injured: dpedestrians.injured,
-                        killed: dpedestrians.killed
-                    };
-                }
-            }
-            if (dtotal) {
-                if (dmtotal) {
-                    dmtotal.injured += dtotal.injured;
-                    dmtotal.killed += dtotal.killed;
-                } else {
-                    dm.total = {
-                        injured: dtotal.injured,
-                        killed: dtotal.killed
-                    };
-                }
-            }
-            /*_.each(d.other, function (v, k) {
-                dm.other[k] = dm.other[k] ? dm.other[k] + v : v;
-            });*/
         }
-        return memo;
+        if (dmotorists) {
+            if (dmmotorists) {
+                dmmotorists.injured += dmotorists.injured;
+                dmmotorists.killed += dmotorists.killed;
+            } else {
+                dm.motorists = {
+                    injured: dmotorists.injured,
+                    killed: dmotorists.killed
+                };
+            }
+        }
+        if (dpassengers) {
+            if (dmpassengers) {
+                dmpassengers.injured += dpassengers.injured;
+                dmpassengers.killed += dpassengers.killed;
+            } else {
+                dm.passengers = {
+                    injured: dpassengers.injured,
+                    killed: dpassengers.killed
+                };
+            }
+        }
+        if (dpedestrians) {
+            if (dmpedestrians) {
+                dmpedestrians.injured += dpedestrians.injured;
+                dmpedestrians.killed += dpedestrians.killed;
+            } else {
+                dm.pedestrians = {
+                    injured: dpedestrians.injured,
+                    killed: dpedestrians.killed
+                };
+            }
+        }
+        if (dtotal) {
+            if (dmtotal) {
+                dmtotal.injured += dtotal.injured;
+                dmtotal.killed += dtotal.killed;
+            } else {
+                dm.total = {
+                    injured: dtotal.injured,
+                    killed: dtotal.killed
+                };
+            }
+        }
+        /*_.each(d.other, function (v, k) {
+          dm.other[k] = dm.other[k] ? dm.other[k] + v : v;
+          });*/
+
     }
 });
 

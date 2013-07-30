@@ -89,12 +89,24 @@ Crashmapper.DimensionControl = L.Control.extend({
         }
         if (dimension.slice(-8) === '-injured') {
             dimension = dimension.slice(0, -8);
-            return function (d, cnt) {
-                return d[dimension] ? d[dimension].injured * volume / cnt : 0;
+            return function (data, len, cnt) {
+                var sum = 0, i = data.length - 1, d;
+                while (i >= 0) {
+                    d = data[i][dimension];
+                    sum += d ? d.injured : 0;
+                    i -= 1;
+                }
+
+                return sum * volume / (cnt * len);
             };
         } else {
-            return function (d, cnt) {
-                return d[dimension] * volume / cnt;
+            return function (data, len, cnt) {
+                var sum = 0, i = data.length - 1;
+                while (i >= 0) {
+                    sum += data[i][dimension] || 0;
+                    i -= 1;
+                }
+                return sum * volume / (cnt * len);
             };
         }
     }

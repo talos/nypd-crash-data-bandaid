@@ -154,7 +154,7 @@ a:active {
 }
 
 #app #map .slider-control {
-    width: 500px;
+    width: 400px;
     background: white;
     box-shadow: 0 1px 7px rgba(0,0,0,0.65);
     -webkit-border-radius: 4px;
@@ -179,9 +179,9 @@ a:active {
     font-weight: bold;
     color: black;
     text-shadow: 0px 0px 5px white;
-    font-size: 3em;
-    left: 520px;
-    top: -14px;
+    font-size: 2.5em;
+    left: 420px;
+    top: -8px;
     width: 100%;
     text-align: left;
 }
@@ -191,7 +191,7 @@ a:active {
 }
 
 #app #map .slider-control #slider {
-    width: 375px;
+    width: 275px;
 }
 
 #app #map #progressbar {

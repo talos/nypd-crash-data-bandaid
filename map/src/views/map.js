@@ -58,7 +58,8 @@ Crashmapper.MapView = Backbone.View.extend({
         }, this)).on('addedlayers', _.bind(function () {
             this.hideProgress();
             this._revalidateVisibleMarkers();
-            this._redrawVisibleMarkers(this._slider.getValue().idx, false);
+            var sliderVals = this._slider.getValues();
+            this._redrawVisibleMarkers(sliderVals[0].idx, sliderVals[1].idx, false);
         }, this));
 
         this.$mapHolder = $('<div />')
@@ -177,6 +178,32 @@ Crashmapper.MapView = Backbone.View.extend({
     },
 
     /**
+     * Update the current popup.
+     */
+    _updatePopup: function (popup, startIdx, endIdx) {
+        var popupTemplate = this._popupTemplate,
+            sumData,
+            data;
+
+        this._curPopup = popup;
+        if (popup) {
+            // Memo the template
+            if (!popupTemplate) {
+                popupTemplate = this._popupTemplate = $('#markerTemplate').html();
+            }
+            sumData = {};
+            data = popup.options.data;
+            while (endIdx >= startIdx) {
+                Crashmapper.Marker.prototype.addDataPoint(sumData, data[endIdx]);
+                endIdx -= 1;
+            }
+            popup.setContent(Mustache.render(popupTemplate, _.extend({}, popup.options, {
+                data: sumData
+            })));
+        }
+    },
+
+    /**
      * Update the markers that are visible.
      */
     _revalidateVisibleMarkers: function () {
@@ -219,7 +246,7 @@ Crashmapper.MapView = Backbone.View.extend({
     /**
      * Redraw them.
      */
-    _redrawVisibleMarkers: function (idx, force) {
+    _redrawVisibleMarkers: function (startIdx, endIdx, force) {
         var zoom = this._map.getZoom(),
             gradient = this._gradient,
             dimension = this._dimensionControl.getDimensionFunction();
@@ -233,10 +260,11 @@ Crashmapper.MapView = Backbone.View.extend({
                 n = 0,
                 d;
 
-            if (data.lastValue === idx && !force) {
+            if (data.lastStartValue === startIdx &&
+                    data.lastEndValue === endIdx && !force) {
                 return;
             }
-            d = data.data[idx];
+            d = data.data.slice(startIdx, endIdx + 1);
             // zoom 16: single intersections only           0 1
             // zoom 15: 1 - 5 intersections, avg 3          1 3
             // zoom 14: 3 - 20 intersections, avg 10        2 9
@@ -248,8 +276,8 @@ Crashmapper.MapView = Backbone.View.extend({
 
             width = 20 * cnt / Math.pow(3, (16 - zoom));
 
-            if (d) {
-                n = dimension(d, cnt);
+            if (d.length) {
+                n = dimension(d, (1 + endIdx - startIdx), cnt);
             }
             if (n > 0) {
                 color = gradient(n);
@@ -275,20 +303,23 @@ Crashmapper.MapView = Backbone.View.extend({
                     $m.hide();
                 }
             }
-            data.lastValue = idx;
+            data.lastStartValue = startIdx;
+            data.lastEndValue = endIdx;
         });
     },
 
-    triggerViewChange: function (year, month) {
-        var sliderValue,
+    triggerViewChange: function (startYear, startMonth, endYear, endMonth) {
+        var sliderValues,
             zoom = this._map.getZoom(),
             center = this._map.getCenter();
-        if (!year || !month) {
-            sliderValue = this._slider.getValue();
-            year = sliderValue.year;
-            month = sliderValue.month;
+        if (!startYear || !startMonth || !endYear || !endMonth) {
+            sliderValues = this._slider.getValues();
+            startYear = sliderValues[0].year;
+            startMonth = sliderValues[0].month;
+            endYear = sliderValues[1].year;
+            endMonth = sliderValues[1].month;
         }
-        this.trigger('changeview', year, month,
+        this.trigger('changeview', startYear, startMonth, endYear, endMonth,
                      this._baseLayerName, this._dimensionControl.dimension,
                      this._dimensionControl.volume, zoom,
                      center.lat, center.lng);
@@ -298,7 +329,8 @@ Crashmapper.MapView = Backbone.View.extend({
     /**
      * @this {Crashmapper.AppView}
      */
-    render: function (newYear, newMonth, newBase, newDimension, newVolume, newZoom, lat, lng) {
+    render: function (newStartYear, newStartMonth, newEndYear, newEndMonth,
+                      newBase, newDimension, newVolume, newZoom, lat, lng) {
         // initial setup
         var attribution = 'Map data &copy; OpenStreetMap contributors';
         newBase = newBase ? newBase.charAt(0).toUpperCase() + newBase.slice(1).toLowerCase() : 'Standard';
@@ -309,7 +341,6 @@ Crashmapper.MapView = Backbone.View.extend({
         newZoom = newZoom || 10;
 
         if (!this._map) {
-            var popupTemplate = $('#markerTemplate').html();
             var map = this._map = new L.Map(this.MAP_HOLDER_ID, {
                 center: new L.LatLng(lat, lng),
                 zoom: newZoom,
@@ -359,37 +390,27 @@ Crashmapper.MapView = Backbone.View.extend({
                 if (e.type === 'baselayerchange') {
                     this._baseLayerName = e.name;
                 }
-                var sliderValue = slider.getValue(),
+                var sliderValues = slider.getValues(),
                     force = true;
                 this.triggerViewChange();
                 if (e.type === 'moveend') {
                     this._revalidateVisibleMarkers();
                     force = false;
                 }
-                this._redrawVisibleMarkers(sliderValue.idx, force);
+                this._redrawVisibleMarkers(sliderValues[0].idx,
+                                           sliderValues[1].idx, force);
             }, this));
 
             this._map.on('slide', _.bind(function (e) {
-                this.triggerViewChange(e.year, e.month);
-                var popup = this._curPopup;
-                if (popup) {
-                    popup.setContent(Mustache.render(popupTemplate, {
-                        data: popup.options.data[e.idx],
-                        streetName: popup.options.streetName,
-                        count: popup.options.count,
-                        aggregate: popup.options.aggregate
-                    }));
-                }
-                this._redrawVisibleMarkers(e.idx, false);
+                this.triggerViewChange(e.start.year, e.start.month,
+                                       e.end.year, e.end.month);
+                this._updatePopup(this._curPopup, e.start.idx, e.end.idx);
+                this._redrawVisibleMarkers(e.start.idx, e.end.idx, false);
             }, this));
 
             this._map.on('popupopen', _.bind(function (e) {
-                var popup = this._curPopup = e.popup;
-                popup.setContent(
-                    Mustache.render(popupTemplate, _.extend({}, popup.options, {
-                        data: popup.options.data[slider.getValue().idx]
-                    }))
-                );
+                var vals = this._slider.getValues();
+                this._updatePopup(e.popup, vals[0].idx, vals[1].idx);
             }, this));
 
             this._map.on('popupclose', _.bind(function () {
@@ -399,8 +420,9 @@ Crashmapper.MapView = Backbone.View.extend({
             this._loadMarkers();
         }
 
-        if (newYear && newMonth) {
-            this._slider.setValue(newYear, newMonth);
+        if (newStartYear && newStartMonth && newEndYear && newEndMonth) {
+            this._slider.setValues(newStartYear, newStartMonth,
+                                   newEndYear, newEndMonth);
         }
         this._map.setZoom(newZoom);
         this._map.panTo(new L.LatLng(lat, lng));
