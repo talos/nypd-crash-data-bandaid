@@ -29,7 +29,7 @@ Crashmapper.Slider = L.Control.extend({
     options: {
         position: 'bottomleft',
         min: 7,
-        max: 29
+        max: 30
     },
 
     onAdd: function (map) {
