@@ -91,11 +91,26 @@ Crashmapper.MapView = Backbone.View.extend({
         });
     },
 
-    _createMarkers: function (data, i, dataLen) {
-        var layers = [],
+    /**
+     * Add markers to to the map in a deferred loop, ensuring UI
+     * responsiveness.
+     *
+     * @this {Crashmapper.AppView}
+     */
+    _createMarkers: function (data, i, dataLen, lastIdx) {
+        var m,
+            layers = [],
             start = new Date();
+
+        lastIdx = lastIdx || 0; // Keep track of last idx of data
+
         while (i < dataLen) {
-            layers.push(new Crashmapper.Marker(data[i]));
+            m = new Crashmapper.Marker(data[i]);
+            layers.push(m);
+            if (lastIdx < m._data.length) {
+                lastIdx = this._lastIdx = m._data.length;
+            }
+
             // Only bother checking dates after 100 layers added
             if (i % 100 === 0) {
                 // Ensure 20fps while loading
@@ -108,10 +123,25 @@ Crashmapper.MapView = Backbone.View.extend({
         this._markers.addLayers(layers);
         this.showProgress("Processing data", i, dataLen);
         if (i >= dataLen) {
+            // Once data is all loaded, add layers and initialize the slider
             this._map.addLayer(this._markers);
+            this._slider = new Crashmapper.Slider({
+                position: "bottomleft",
+                min: 7,
+                max: 7 + lastIdx
+            }).addTo(this._map);
+            // Since the 'about' for the slider wouldn't be shown, we have to
+            // do an after-the-fact check to see if "help" is currently
+            // visible.  If so, it needs to be shown for the slider, too!
+            // Since all help is visible when any help is visible, this `if`
+            // statement works.
+            // TODO: clean this up.
+            if ($('.help').is(':visible')) {
+                $('.help', this._slider.$el).fadeIn();
+            }
         } else {
             // continue deferred loop
-            _.defer(_.bind(this._createMarkers, this), data, i, dataLen);
+            _.defer(_.bind(this._createMarkers, this), data, i, dataLen, lastIdx);
         }
     },
 
@@ -368,9 +398,6 @@ Crashmapper.MapView = Backbone.View.extend({
 
             new L.Control.Layers(baseLayers, [], {position: "topleft"}).addTo(this._map);
             new L.Control.Zoom({position: "topleft"}).addTo(this._map);
-            var slider = this._slider = new Crashmapper.Slider({
-                position: "bottomleft"
-            }).addTo(this._map);
 
             this._helpControl = new Crashmapper.HelpControl({
                 position: 'topleft'
@@ -390,7 +417,7 @@ Crashmapper.MapView = Backbone.View.extend({
                 if (e.type === 'baselayerchange') {
                     this._baseLayerName = e.name;
                 }
-                var sliderValues = slider.getValues(),
+                var sliderValues = this._slider.getValues(),
                     force = true;
                 this.triggerViewChange();
                 if (e.type === 'moveend') {

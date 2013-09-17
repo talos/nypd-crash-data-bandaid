@@ -6,7 +6,7 @@ are some outstanding tasks:
 * __(RESOLVED)__ `e766e46` *Mobile block, to advise people against trying to
   load the map on their cell phones.*
 * A clearer disclaimer/link to licensing info.
-* Determine end date from loaded data instead of hardcoding it.
+* __(RESOLVED)__ Determine end date from loaded data instead of hardcoding it.
 * Explanation in docs of how to read popup layout.
 * Help in-popup to see what it means.
 
