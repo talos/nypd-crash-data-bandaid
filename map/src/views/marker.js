@@ -151,6 +151,7 @@ Crashmapper.Marker = L.Marker.extend({
      * Returns nothing.
      */
     addDataPoint: function (dm, d) {
+        if (!d) { return; }
         var dcyclists = d.cyclists,
             dmotorists = d.motorists,
             dpassengers = d.passengers,

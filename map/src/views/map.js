@@ -33,6 +33,10 @@ Crashmapper.MapView = Backbone.View.extend({
      */
     initialize: function () {
         this.MAP_HOLDER_ID = 'mapHolder';
+        this._ready = false;
+        this.on('ready', _.bind(function () {
+            this._ready = true;
+        }, this));
 
         var $progressBar = this.$progressBar = $('<div />')
             .progressbar()
@@ -125,11 +129,9 @@ Crashmapper.MapView = Backbone.View.extend({
         if (i >= dataLen) {
             // Once data is all loaded, add layers and initialize the slider
             this._map.addLayer(this._markers);
-            this._slider = new Crashmapper.Slider({
-                position: "bottomleft",
-                min: 7,
-                max: 7 + lastIdx
-            }).addTo(this._map);
+
+            this._slider.options.max = 7 + lastIdx;
+            this._slider.addTo(this._map);
             // Since the 'about' for the slider wouldn't be shown, we have to
             // do an after-the-fact check to see if "help" is currently
             // visible.  If so, it needs to be shown for the slider, too!
@@ -139,6 +141,8 @@ Crashmapper.MapView = Backbone.View.extend({
             if ($('.help').is(':visible')) {
                 $('.help', this._slider.$el).fadeIn();
             }
+
+            this.trigger('ready');
         } else {
             // continue deferred loop
             _.defer(_.bind(this._createMarkers, this), data, i, dataLen, lastIdx);
@@ -339,21 +343,28 @@ Crashmapper.MapView = Backbone.View.extend({
     },
 
     triggerViewChange: function (startYear, startMonth, endYear, endMonth) {
-        var sliderValues,
-            zoom = this._map.getZoom(),
-            center = this._map.getCenter();
-        if (!startYear || !startMonth || !endYear || !endMonth) {
-            sliderValues = this._slider.getValues();
-            startYear = sliderValues[0].year;
-            startMonth = sliderValues[0].month;
-            endYear = sliderValues[1].year;
-            endMonth = sliderValues[1].month;
-        }
-        this.trigger('changeview', startYear, startMonth, endYear, endMonth,
-                     this._baseLayerName, this._dimensionControl.dimension,
-                     this._dimensionControl.volume, zoom,
-                     center.lat, center.lng);
+        var _triggerViewChange = _.bind(function () {
+            var sliderValues,
+                zoom = this._map.getZoom(),
+                center = this._map.getCenter();
+            if (!startYear || !startMonth || !endYear || !endMonth) {
+                sliderValues = this._slider.getValues();
+                startYear = sliderValues[0].year;
+                startMonth = sliderValues[0].month;
+                endYear = sliderValues[1].year;
+                endMonth = sliderValues[1].month;
+            }
+            this.trigger('changeview', startYear, startMonth, endYear, endMonth,
+                         this._baseLayerName, this._dimensionControl.dimension,
+                         this._dimensionControl.volume, zoom,
+                         center.lat, center.lng);
+        }, this);
 
+        if (this._ready) {
+            _triggerViewChange();
+        } else {
+            this.on('ready', _triggerViewChange);
+        }
     },
 
     /**
@@ -406,6 +417,11 @@ Crashmapper.MapView = Backbone.View.extend({
             this._linkControl = new Crashmapper.LinkControl({
                 position: 'topleft'
             }).addTo(this._map);
+
+            this._slider = new Crashmapper.Slider({
+                position: "bottomleft",
+                min: 7
+            });
 
             this._dimensionControl = new Crashmapper.DimensionControl({
                 position: 'topright',

@@ -27,7 +27,8 @@
  */
 Crashmapper.Slider = L.Control.extend({
     options: {
-        position: 'bottomleft'
+        position: 'bottomleft',
+        min: 7
     },
 
     onAdd: function (map) {
@@ -167,16 +168,31 @@ Crashmapper.Slider = L.Control.extend({
         return this._months[value.month] + " &rsquo;" + (Number(value.year) - 2000);
     },
 
+    /**
+     * Set the slider's max value after-the-fact.
+     */
+    setMax: function (newMax) {
+        this.$slider.slider('option', 'max', newMax);
+    },
+
     setValues: function (startYear, startMonth, endYear, endMonth) {
         var startIdx = ((startYear - 2011) * 12) + startMonth,
             endIdx = ((endYear - 2011) * 12) + endMonth;
-        if (startIdx === endIdx && startIdx > 0) {
-            this.$slider.slider('values', 1, endIdx);
-            this.$slider.slider('values', 0, startIdx);
+
+        // Update slider right away if initialiazed
+        if (this.$slider) {
+            if (startIdx === endIdx && startIdx > 0) {
+                this.$slider.slider('values', 1, endIdx);
+                this.$slider.slider('values', 0, startIdx);
+            } else {
+                this.$slider.slider('values', 0, startIdx);
+                this.$slider.slider('values', 1, endIdx);
+            }
+
+        // Otherwise update defaults for when slider is initaliazed
         } else {
-            this.$slider.slider('values', 0, startIdx);
-            this.$slider.slider('values', 1, endIdx);
+            this.options.start = startIdx;
+            this.options.end = endIdx;
         }
-        this._updateCurrentDiv(startIdx, endIdx);
     }
 });
