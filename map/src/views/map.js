@@ -130,7 +130,7 @@ Crashmapper.MapView = Backbone.View.extend({
             // Once data is all loaded, add layers and initialize the slider
             this._map.addLayer(this._markers);
 
-            this._slider.options.max = 7 + lastIdx;
+            this._slider.options.max = 7 + lastIdx - 1;
             this._slider.addTo(this._map);
             // Since the 'about' for the slider wouldn't be shown, we have to
             // do an after-the-fact check to see if "help" is currently
