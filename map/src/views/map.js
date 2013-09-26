@@ -19,7 +19,7 @@
    ***/
 
 /*jslint browser: true, nomen: true, sub: true, vars: true, sloppy: true*/
-/*globals Backbone, $, Crashmapper, Mustache, L, _ */
+/*globals Backbone, $, Crashmapper, Mustache, L, _, _CRASHMAPPER_HASH */
 
 /**
  * @param {Object} options
@@ -159,6 +159,7 @@ Crashmapper.MapView = Backbone.View.extend({
         if (window.location.host.search('localhost') === -1) {
             dataFile += '.gz'; // For remote servers, use gzip.
         }
+        dataFile += '?_=' + _CRASHMAPPER_HASH;
         var $xhr = $.getJSON(dataFile, _.bind(function (data) {
             //data = data.slice(0, 3000);
             this._createMarkers(data, 0, data.length);

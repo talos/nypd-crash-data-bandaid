@@ -1,3 +1,8 @@
+SHA1=$(shell git rev-parse HEAD)
+
+test:
+	echo $(SHA1)
+
 clean:
 	rm -rf build/*
 
@@ -5,12 +10,13 @@ compile: clean
 	mkdir -p build/js
 	cp -R public/css public/images public/index.html public/favicon.ico public/data build/
 	cp -R lib build/js/
+	echo 'var _CRASHMAPPER_HASH = "$(SHA1)";' > build/js/crashmapper.js
 	cat src/header.js \
 	    src/crashmapper.js \
 	    src/routers/* \
 	    src/views/* \
 	    src/footer.js \
-	    > build/js/crashmapper.js
+	    >> build/js/crashmapper.js
 
 host: compile
 	cd build && python -m SimpleHTTPServer 8000
