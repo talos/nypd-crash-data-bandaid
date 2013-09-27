@@ -28,29 +28,34 @@
 Crashmapper.DimensionControl = L.Control.extend({
     options: {
         position: 'topright',
-        dimension: 'collisions',
-        volume: 2
+        dimension: 'collisions'
     },
 
-    onAdd: function () {
+    onAdd: function (map) {
         var div = L.DomUtil.create('div', 'dimension-control leaflet-bar'),
             dimensions = this._dimensions = {},
             self = this;
         div.innerHTML = $('#dimensionControlTemplate').html();
-        this.volume = this.options.volume;
-        this.dimension = this.options.dimension;
+        //this.dimension = this.options.dimension;
         $.each($('a', div), function (i, el) {
             var $el = $(el),
                 dim = $el.attr('href').slice(1),
-                volume = Number($el.attr('data-volume'));
+                defaultVolume = Number($el.attr('data-volume'));
             dimensions[dim] = $el;
             $el.on('click', function (evt) {
                 evt.preventDefault();
-                self.selectDimension(dim, volume);
+                self.selectDimension(dim, defaultVolume, $el.attr('title'));
                 return false;
             });
+            if (dim === self.options.dimension) {
+                map.on('ready', function () {
+                    $el.trigger('click');
+                });
+            }
         });
-        this.highlightCurrentDimension();
+        //this.highlightCurrentDimension();
+        //self.selectDimension(this.options.dimension);
+
         return div;
     },
 
@@ -59,30 +64,27 @@ Crashmapper.DimensionControl = L.Control.extend({
         _.each(this._dimensions, _.bind(function ($el, dim) {
             if (curDim === dim) {
                 $el.addClass('selected');
-                this.updateTitle($el.attr('title'));
+                //this.updateTitle($el.attr('title'));
             } else {
                 $el.removeClass('selected');
             }
         }, this));
     },
 
-    updateTitle: function (title) {
-        $('#slider-current .layer').text(title);
-    },
-
-    selectDimension: function (dim, volume) {
+    selectDimension: function (dim, defaultVolume, dimTitle) {
         if (this.dimension === dim || !_.has(this._dimensions, dim)) {
             return;
         }
         this.dimension = dim;
-        this.volume = volume;
         this.highlightCurrentDimension();
-        this._map.fire('dimensionchange');
+        this._map.fire('dimensionchange', {
+            title: dimTitle,
+            defaultVolume: defaultVolume
+        });
     },
 
-    getDimensionFunction: function () {
-        var volume = this.volume,
-            dimension = this.dimension;
+    getDimensionFunction: function (volume) {
+        var dimension = this.dimension;
         // crazy performance penalties otherwise!
         if (dimension === 'collisions-with-injuries') {
             dimension = 'collisionsWithInjuries';

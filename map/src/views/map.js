@@ -36,6 +36,7 @@ Crashmapper.MapView = Backbone.View.extend({
         this._ready = false;
         this.on('ready', _.bind(function () {
             this._ready = true;
+            this._map.fire('ready');
         }, this));
 
         var $progressBar = this.$progressBar = $('<div />')
@@ -159,7 +160,7 @@ Crashmapper.MapView = Backbone.View.extend({
         if (window.location.host.search('localhost') === -1) {
             dataFile += '.gz'; // For remote servers, use gzip.
         }
-        dataFile += '?_=' + _CRASHMAPPER_HASH;
+        //dataFile += '?_=' + _CRASHMAPPER_HASH;
         var $xhr = $.getJSON(dataFile, _.bind(function (data) {
             //data = data.slice(0, 3000);
             this._createMarkers(data, 0, data.length);
@@ -279,12 +280,13 @@ Crashmapper.MapView = Backbone.View.extend({
     },
 
     /**
-     * Redraw them.
+     * Redraw markers visible on the map, including those on the legend.
      */
     _redrawVisibleMarkers: function (startIdx, endIdx, force) {
         var zoom = this._map.getZoom(),
             gradient = this._gradient,
-            dimension = this._dimensionControl.getDimensionFunction();
+            dimension = this._dimensionControl.getDimensionFunction(this._legendControl.volume);
+        this._legendControl.update(gradient);
         _.each(this._visibleMarkers, function (v) {
             var $m = v[0],
                 data = v[1],
@@ -300,14 +302,6 @@ Crashmapper.MapView = Backbone.View.extend({
                 return;
             }
             d = data.data.slice(startIdx, endIdx + 1);
-            // zoom 16: single intersections only           0 1
-            // zoom 15: 1 - 5 intersections, avg 3          1 3
-            // zoom 14: 3 - 20 intersections, avg 10        2 9
-            // zoom 13: 10 - 70 intersections, avg 50       3 27
-            // zoom 12: 20 - 200 intersections, avg 100     4 81
-            // zoom 11: 50 - 600 intesrsections, avg 250    5 243
-            // zoom 10: 150 - 2000 intersections, avg 800   6 729
-            // zoom 9:  300 - 5000 intersections, avg 2500  7 2187
 
             width = 20 * cnt / Math.pow(3, (16 - zoom));
 
@@ -357,7 +351,7 @@ Crashmapper.MapView = Backbone.View.extend({
             }
             this.trigger('changeview', startYear, startMonth, endYear, endMonth,
                          this._baseLayerName, this._dimensionControl.dimension,
-                         this._dimensionControl.volume, zoom,
+                         this._legendControl.volume, zoom,
                          center.lat, center.lng);
         }, this);
 
@@ -424,15 +418,30 @@ Crashmapper.MapView = Backbone.View.extend({
                 min: 7
             });
 
-            this._dimensionControl = new Crashmapper.DimensionControl({
+            this._legendControl = new Crashmapper.LegendControl({
                 position: 'topright',
-                dimension: newDimension,
                 volume: newVolume
             }).addTo(this._map);
 
-            this._map.on('dimensionchange baselayerchange moveend', _.bind(function (e) {
+            this._dimensionControl = new Crashmapper.DimensionControl({
+                position: 'topright',
+                dimension: newDimension
+            }).addTo(this._map);
+
+            this.on('ready', function () {
+                this._legendControl.update(this._gradient);
+            });
+
+            this._map.on('dimensionchange baselayerchange moveend volumechange', _.bind(function (e) {
                 if (e.type === 'baselayerchange') {
                     this._baseLayerName = e.name;
+                }
+                if (e.type === 'dimensionchange') {
+                    this._legendControl.update(this._gradient, e.defaultVolume,
+                                               e.title);
+                }
+                if (e.type === 'volumechange') {
+                    this._legendControl.update(this._gradient, e.volume);
                 }
                 var sliderValues = this._slider.getValues(),
                     force = true;

@@ -74,7 +74,7 @@ a:active {
     z-index: 0;
 }
 
-#app #map #mapHolder .intersection-marker.aggregate div {
+#app #map #mapHolder .intersection-marker.aggregate div,.legend-bubble {
     border-radius: 100px;
 }
 
@@ -83,9 +83,12 @@ a:active {
     box-shadow: 2px 2px 2px black;*/
 }
 
-#app #map #mapHolder .intersection-marker div {
+#app #map #mapHolder .intersection-marker div,.legend-bubble {
     width: 10px;
     height: 10px;
+}
+
+#app #map #mapHolder .intersection-marker div {
     margin-left: -6px;
     margin-top: -6px;
 }
@@ -93,6 +96,37 @@ a:active {
 #app #map #mapHolder .intersection-marker div:hover {
     color: black !important;
     background-color: white !important;
+}
+
+#app #map .legend-control {
+    background-color: #fff;
+    padding: 10px;
+    font-weight: 200;
+    width: 180px;
+}
+
+#app #map .legend-control .legend-bubble {
+    display: inline-block;
+    margin: 10px !important;
+    position: relative;
+}
+
+#app #map .legend-control #legend-control-volume {
+    float: right;
+    height: 80px;
+}
+
+#app #map .legend-control #legend-control-volume a:hover {
+    width: 1.2em !important;
+    height: 1.2em !important;
+}
+
+#app #map .legend-control .legend-bubble .legend-bubble-text {
+    position: absolute;
+    left: -10px;
+    top: 15px;
+    width: 28px;
+    text-align: center;
 }
 
 #app #map .dimension-control a {
