@@ -19,13 +19,14 @@
    ***/
 
 /*jslint browser: true, nomen: true, sloppy: true*/
-/*globals Backbone, Crashmapper*/
+/*globals Backbone, Crashmapper, ga, _*/
 
 Crashmapper.AppRouter = Backbone.Router.extend({
 
     initialize: function (options) {
         this.view = options.view;
 
+        // Keep URL in sync with map.
         this.view.map.on('changeview', function (startYear, startMonth,
                                                  endYear, endMonth, base,
                                                  dimension, volume, zoom, lat,
@@ -45,6 +46,18 @@ Crashmapper.AppRouter = Backbone.Router.extend({
         ':startYear/:startMonth/:endYear/:endMonth/:base/:dimension/:volume/:zoom/:lat/:lng':
             'map',
         '*notFound': 'notFound'
+    },
+
+    /**
+     * Override navigate to trigger GA.
+     */
+    navigate: function () {
+        var retval = Backbone.Router.prototype.navigate.apply(this, arguments);
+        try {
+            ga('send', 'pageview');
+        } catch (err) { // In case GA wasn't loaded yet.
+        }
+        return retval;
     },
 
     /**
