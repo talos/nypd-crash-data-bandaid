@@ -33,8 +33,10 @@ Crashmapper.LegendControl = L.Control.extend({
     },
 
     onAdd: function (map) {
-        var div = L.DomUtil.create('div', 'legend-control leaflet-bar'),
+        var div = L.DomUtil.create('div', 'legend-control'),
             bubbles = this._bubbles = [],
+            $toggle,
+            self = this,
             i;
         div.innerHTML = $('#legendControlTemplate').html();
 
@@ -43,7 +45,7 @@ Crashmapper.LegendControl = L.Control.extend({
         }
 
         _.each(bubbles, function ($b) {
-            $(div).append($b);
+            $('#legend-control-bubbles', div).append($b);
         });
 
         this.volume = this.options.volume;
@@ -61,6 +63,25 @@ Crashmapper.LegendControl = L.Control.extend({
             map.dragging.disable();
         }).on('slidestop', function (evt) {
             map.dragging.enable();
+        }).on('click', function (evt) {
+            // If user tries to use slider when locked, unlock it for them.
+            if (self.$volume.slider('option', 'disabled')) {
+                self.$toggle.trigger('click');
+            }
+        });
+        this.$toggle = $('#legend-control-toggle', div).on('click', function (evt) {
+            evt.preventDefault();
+            evt.stopPropagation();
+            if (self.isLocked()) {
+                self.$volume.slider('enable');
+                $(this).removeClass('ui-icon-locked');
+                $(this).addClass('ui-icon-unlocked');
+            } else {
+                self.$volume.slider('disable');
+                $(this).addClass('ui-icon-locked');
+                $(this).removeClass('ui-icon-unlocked');
+            }
+            return false;
         });
 
         return div;
@@ -76,17 +97,22 @@ Crashmapper.LegendControl = L.Control.extend({
         if (title) {
             this.$title.text(title);
         }
-        if (volume) {
+
+        // Don't allow overwrite of slider when it's locked.
+        if (volume && !this.isLocked()) {
             this.$volume.slider('value', volume);
             this.volume = volume;
+        } else {
+            volume = this.volume;
         }
-        volume = volume || this.volume;
-        _.each(this._bubbles, function ($b) {
+        _.each(this._bubbles, _.bind(function ($b) {
             var intensity = $b.data('crashmapper-legend-bubble-intensity') * 2.5,
                 n = intensity,
                 color = gradient(n),
                 darkColor = gradient(2 / n),
                 width = 10,
+                fraction = this._reduce(intensity, volume),
+                fractionText,
                 $text = $('.legend-bubble-text', $b);
             $b.css({
                 'box-shadow': '0px 0px ' + Math.round(width) + 'px ' +
@@ -95,8 +121,27 @@ Crashmapper.LegendControl = L.Control.extend({
                 'border': '1px solid ' + darkColor,
                 'color': (n > 2 / n) ? color : darkColor,
             });
-            $text.text((intensity / volume).toFixed(2));
-        });
+
+            if (fraction[0] === 0) {
+                fractionText = '0';
+            } else if (fraction[1] === 1) {
+                fractionText = fraction[0];
+            } else if (volume > 10) {
+                fractionText = (intensity / volume).toFixed(2);
+            } else {
+                fractionText = fraction[0] + '/' + fraction[1];
+            }
+
+            $text.text(fractionText);
+        }, this));
+    },
+
+    /**
+     * Returns true if the legend control slider is current locked, false
+     * otherwise.
+     */
+    isLocked: function () {
+        return this.$volume.slider('option', 'disabled');
     },
 
     /**
@@ -107,5 +152,18 @@ Crashmapper.LegendControl = L.Control.extend({
         $bubble.data('crashmapper-legend-bubble-intensity', intensity);
         $bubble.append($('<div />').addClass('legend-bubble-text'));
         return $bubble;
+    },
+
+    /**
+     * Reduce a fraction by finding the Greatest Common Divisor and dividing by it.
+     *
+     * From http://stackoverflow.com/a/4652513
+     */
+    _reduce: function (numerator, denominator) {
+        var gcd = function gcd(a, b) {
+            return b ? gcd(b, a % b) : a;
+        };
+        gcd = gcd(numerator, denominator);
+        return [numerator / gcd, denominator / gcd];
     }
 });

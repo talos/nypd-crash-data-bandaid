@@ -99,10 +99,20 @@ a:active {
 }
 
 #app #map .legend-control {
-    background-color: #fff;
+    background-color: white;
+    box-shadow: 0 1px 7px rgba(0,0,0,0.65);
+    -webkit-border-radius: 4px;
+            border-radius: 4px;
     padding: 10px;
     font-weight: 200;
     width: 180px;
+}
+
+#app #map .legend-control .help {
+    display: block;
+    position: absolute;
+    right: 210px;
+    top: 0px;
 }
 
 #app #map .legend-control .legend-bubble {
@@ -111,14 +121,20 @@ a:active {
     position: relative;
 }
 
-#app #map .legend-control #legend-control-volume {
+#app #map .legend-control #legend-control-volume-holder {
     float: right;
+    height: 100px;
+    position: relative;
+}
+
+#app #map .legend-control #legend-control-volume-holder #legend-control-volume {
     height: 80px;
 }
 
-#app #map .legend-control #legend-control-volume a:hover {
-    width: 1.2em !important;
-    height: 1.2em !important;
+#app #map .legend-control #legend-control-volume-holder #legend-control-toggle {
+    position: absolute;
+    bottom: 0px;
+    left: -1px;
 }
 
 #app #map .legend-control .legend-bubble .legend-bubble-text {
@@ -127,6 +143,10 @@ a:active {
     top: 15px;
     width: 28px;
     text-align: center;
+}
+
+#app #map .legend-control #legend-control-toggle {
+    display: block;
 }
 
 #app #map .dimension-control a {

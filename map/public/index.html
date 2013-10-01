@@ -21,9 +21,15 @@
         </script>
 
         <script type="text/html" id="legendControlTemplate">
-          <div id="legend-control-volume"></div>
+          <div class="help" style="display:none">Heatmap legend.  Unlock the slider to change heat intensity. →</div>
+          <div id="legend-control-volume-holder">
+            <div id="legend-control-volume"></div>
+            <a id="legend-control-toggle" class="ui-icon ui-icon-locked" href="#"
+              title="Move slider to change heat intensity. Lock to prevent automatic adjustment." alt="Move slider to change heat intensity. Lock to prevent automatic adjustment."></a>
+          </div>
           <div id="legend-control-title"></div>
           <div><small>per intersection per month</small></div>
+          <div id="legend-control-bubbles"></div>
         </script>
 
         <script type="text/html" id="mobileWarningTemplate">
@@ -114,7 +120,7 @@
         </script>
 
         <script type="text/html" id="dimensionControlTemplate">
-          <a href="#collisions-with-injuries" title="Collisions with Injuries" alt="Collisions with Injuries" data-volume="8">
+          <a href="#collisions-with-injuries" title="Collisions with Injuries" alt="Collisions with Injuries" data-volume="12">
             <div class="help">Collisions with Injuries →</div>
             <img src="/images/collision-with-injury.png" class="ideograph" />
           </a>
