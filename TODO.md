@@ -18,6 +18,8 @@ are some outstanding tasks:
   input script is sometimes dropping certain stats from intersections.*
 * __(RESOLVED)__ `d771a9e` *Memory profile and fix leaks, particularly in FF.*
 * __(RESOLVED)__ `d6cb4c7` *Fix bug that could cause empty popups to display.*
+* Panning across the map after an overlay change doesn't always refresh data
+  properly.
 
 ### Significant new features
 
@@ -27,13 +29,13 @@ are some outstanding tasks:
   entirety, rather than just one edge.*
 * Providing an interface to view the vehicle type and contributing factor
   overlays.  The data's already loaded in.
-* Display a color-coded legend.
+* __(RESOLVED)__ `3a11c1e` *Display a color-coded legend.*
 * Location box to quickly jump to a specific address.
 * Allow custom aggregation based off of a drawn shape.
   - Provide some useful pre-made shapes (council districts, CDs, boroughs,
     etc.)
 * Allow automatic zoom-to-area.
-* Provide interface to change "volume" of data.
+* __(RESOLVED)__ `4f40b81` *Provide interface to change "volume" of data.*
 * Allow for quick back-and-forth switches between different views (for example,
   to compare two different time spans.)
 
