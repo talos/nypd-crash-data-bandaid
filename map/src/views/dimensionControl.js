@@ -76,6 +76,7 @@ Crashmapper.DimensionControl = L.Control.extend({
             return;
         }
         this.dimension = dim;
+        this.dimensionTitle = dimTitle;
         this.highlightCurrentDimension();
         this._map.fire('dimensionchange', {
             title: dimTitle,

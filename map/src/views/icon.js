@@ -40,7 +40,8 @@ Crashmapper.Icon = L.DivIcon.extend({
         var div,
             $div,
             marker = this.options.marker,
-            popup;
+            bigPopup,
+            smallPopup;
 
         // call parent method explicitly
         div = L.DivIcon.prototype.createIcon.call(this);
@@ -58,7 +59,7 @@ Crashmapper.Icon = L.DivIcon.extend({
         }));
 
         // create popup and bind mouseover
-        popup = this.popup = new L.Popup({
+        bigPopup = new L.Popup({
             data: this.options.data,
             streetName: this.options.streetName,
             count: this.options.count,
@@ -66,7 +67,14 @@ Crashmapper.Icon = L.DivIcon.extend({
             maxWidth: 350
         });
 
-        marker.bindPopup(this.popup);
+        marker.bindPopup(bigPopup);
+
+        $div.on('mouseenter', function () {
+            ///debugger;
+        });
+        $div.on('mouseleave', function () {
+
+        });
 
         return div;
     }

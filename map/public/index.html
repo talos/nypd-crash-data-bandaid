@@ -164,14 +164,15 @@
 
         <script type="text/html" id="markerTemplate">
           <div class="popup">
-            <h3>
+            <div>
+              {{incidentCount}} {{incidentType}} over {{monthCount}} months at
                 {{#aggregate}}
-                  {{count}} intersections near {{streetName}}
+                  {{count}} intersections near {{streetName}} ({{rate}} per intersection per month)
                 {{/aggregate}}
                 {{^aggregate}}
-                  {{streetName}}
+                  {{streetName}} ({{rate}} per month)
                 {{/aggregate}}
-            </h3>
+            </div>
             {{#data}}
             <div class="data">
               <table>

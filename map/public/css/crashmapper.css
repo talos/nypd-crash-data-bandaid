@@ -58,6 +58,7 @@ a:active {
 #app #map * .popup .data {
     text-align: center;
     white-space: nowrap;
+    padding-top: 6px;
 }
 
 #app #map * .popup .data table {

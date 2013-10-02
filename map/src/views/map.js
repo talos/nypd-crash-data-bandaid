@@ -219,7 +219,12 @@ Crashmapper.MapView = Backbone.View.extend({
     _updatePopup: function (popup, startIdx, endIdx) {
         var popupTemplate = this._popupTemplate,
             sumData,
-            data;
+            data,
+            popupData,
+            i;
+
+        startIdx = startIdx || this._slider.getValues()[0].idx;
+        endIdx = endIdx || this._slider.getValues()[1].idx;
 
         this._curPopup = popup;
         if (popup) {
@@ -229,13 +234,20 @@ Crashmapper.MapView = Backbone.View.extend({
             }
             sumData = {};
             data = popup.options.data;
-            while (endIdx >= startIdx) {
-                Crashmapper.Marker.prototype.addDataPoint(sumData, data[endIdx]);
-                endIdx -= 1;
+            i = endIdx;
+            while (i >= startIdx) {
+                Crashmapper.Marker.prototype.addDataPoint(sumData, data[i]);
+                i -= 1;
             }
-            popup.setContent(Mustache.render(popupTemplate, _.extend({}, popup.options, {
-                data: sumData
-            })));
+            popupData = _.extend({}, popup.options, {
+                data: sumData,
+                incidentCount: this._dimensionControl.getDimensionFunction(1)(data.slice(startIdx, endIdx + 1), 1, 1),
+                incidentType: this._dimensionControl.dimensionTitle,
+                monthCount: endIdx - startIdx + 1,
+            });
+            popupData.rate = (popupData.incidentCount /
+                              (popupData.monthCount * popupData.count)).toFixed(2);
+            popup.setContent(Mustache.render(popupTemplate, popupData));
         }
     },
 
@@ -442,6 +454,7 @@ Crashmapper.MapView = Backbone.View.extend({
                 if (e.type === 'dimensionchange') {
                     this._legendControl.update(this._gradient, e.defaultVolume,
                                                e.title);
+                    this._updatePopup(this._curPopup);
                 }
                 if (e.type === 'volumechange') {
                     this._legendControl.update(this._gradient, e.volume);
