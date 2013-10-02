@@ -75,17 +75,27 @@ a:active {
 }
 
 #app #map #mapHolder .intersection-marker.aggregate div,.legend-bubble {
+    border-style: solid;
+    border-width: 1px;
     border-radius: 100px;
-}
-
-#app #map #mapHolder .intersection-marker.single div {
-    /*border: 1px solid black;
-    box-shadow: 2px 2px 2px black;*/
-}
-
-#app #map #mapHolder .intersection-marker div,.legend-bubble {
     width: 10px;
     height: 10px;
+}
+
+#app #map #mapHolder .intersection-marker.single div,.legend-single {
+    /*border: 2px solid black;
+    box-shadow: 2px 2px 4px black;*/
+    border-width: 3px;
+    border-style: double;
+    width: 4px;
+    height: 4px;
+    position: relative;
+    top: -6px;
+    transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
 }
 
 #app #map #mapHolder .intersection-marker div {
@@ -115,16 +125,26 @@ a:active {
     top: 0px;
 }
 
-#app #map .legend-control .legend-bubble {
+#app #map .legend-control #legend-control-bubbles .legend-bubble {
     display: inline-block;
     margin: 10px !important;
     position: relative;
+}
+
+#app #map .legend-control #legend-control-title {
+    line-height: 0.5;
+}
+
+#app #map .legend-control #legend-control-bubbles {
+    padding-top: 5px;
+    padding-bottom: 8px;
 }
 
 #app #map .legend-control #legend-control-volume-holder {
     float: right;
     height: 100px;
     position: relative;
+    top: 10px;
 }
 
 #app #map .legend-control #legend-control-volume-holder #legend-control-volume {
@@ -147,6 +167,35 @@ a:active {
 
 #app #map .legend-control #legend-control-toggle {
     display: block;
+}
+
+/*#app #map .legend-control #legend-control-aggregations div {
+    position: relative;
+}*/
+
+#app #map .legend-control #legend-control-aggregations {
+    display: table;
+}
+
+#app #map .legend-control #legend-control-aggregations div {
+    display: table-row;
+}
+
+#app #map .legend-control #legend-control-aggregations div span {
+    display: table-cell;
+    margin-top: 5px;
+}
+
+#app #map .legend-control #legend-control-aggregations div span .legend-single {
+    display: block;
+    position: relative;
+    top: -2px;
+}
+
+#app #map .legend-control #legend-control-aggregations div span .legend-bubble {
+    display: block;
+    position: relative;
+    top: 0px;
 }
 
 #app #map .dimension-control a {

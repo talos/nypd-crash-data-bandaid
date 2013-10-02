@@ -48,6 +48,10 @@ Crashmapper.LegendControl = L.Control.extend({
             $('#legend-control-bubbles', div).append($b);
         });
 
+        // Add aggregation example bubbles
+        bubbles.push($('#legend-control-aggregations .legend-single', div));
+        bubbles.push($('#legend-control-aggregations .legend-bubble', div));
+
         this.volume = this.options.volume;
         this.$title = $('#legend-control-title', div);
         this.$volume = $('#legend-control-volume', div).slider({
@@ -106,7 +110,7 @@ Crashmapper.LegendControl = L.Control.extend({
             volume = this.volume;
         }
         _.each(this._bubbles, _.bind(function ($b) {
-            var intensity = $b.data('crashmapper-legend-bubble-intensity') * 2.5,
+            var intensity = ($b.data('crashmapper-legend-bubble-intensity') || 0) * 2.5,
                 n = intensity,
                 color = gradient(n),
                 darkColor = gradient(2 / n),
@@ -118,7 +122,7 @@ Crashmapper.LegendControl = L.Control.extend({
                 'box-shadow': '0px 0px ' + Math.round(width) + 'px ' +
                     Math.round(width * 3 / 4) + 'px' + ' ' + color,
                 'background-color': color,
-                'border': '1px solid ' + darkColor,
+                'border-color': darkColor,
                 'color': (n > 2 / n) ? color : darkColor,
             });
 

@@ -320,13 +320,16 @@ Crashmapper.MapView = Backbone.View.extend({
                     'box-shadow': '0px 0px ' + Math.round(width) + 'px ' +
                         Math.round(width * 3 / 4) + 'px' + ' ' + color,
                     'background-color': color,
-                    'border': '1px solid ' + darkColor
+                    'border-color': darkColor
                 });
             } else {
                 if (n > 0) {
                     $m.show().css({
                         'background-color': color,
-                        'border': '1px solid ' + darkColor
+                        'box-shadow': '0px 0px ' + Math.round(width) + 'px ' +
+                            Math.round(width * 3 / 4) + 'px' + ' ' + color,
+                        'border-color': darkColor
+                        //'border': '1px solid ' + darkColor
                     });
                 } else {
                     $m.hide();
