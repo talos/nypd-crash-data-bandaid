@@ -39,6 +39,8 @@ are some outstanding tasks:
 * Allow for quick back-and-forth switches between different views (for example,
   to compare two different time spans.)
 * Use NYC Geocoder instead of Google
+* Allow search for specific intersection based off characteristics (at least X
+  collisions with injuries, etc.)
 
 ### Infrastructural changes
 
