@@ -106,8 +106,8 @@ if __name__ == '__main__':
     sh = xlrd.open_workbook(file_contents=resp.content).sheet_by_index(0)
     _, cur_month_name, cur_year = sh.row(1)[0].value.split()
 
-    year = month2num(cur_month_name)
-    month = int(cur_year)
+    month = month2num(cur_month_name)
+    year = int(cur_year)
 
     path = os.path.join(archive_path, str(year), u'{:0>2}'.format(month))
     try:
@@ -118,10 +118,10 @@ if __name__ == '__main__':
     for boro in ('city', 'bk', 'bx', 'mn', 'qn', 'si'):
         pdf_resp = requests.get(u'{0}{1}{2}'.format(CURRENT_PDF_ROOT, boro, 'acc.pdf'))
         filename = pdf_resp.url.split('/')[-1]
-        open(os.path.join(path, filename), 'w').write(resp.content)
+        open(os.path.join(path, filename), 'w').write(pdf_resp.content)
         sys.stderr.write(u"Wrote {0} to {1}\n".format(filename, path))
 
         excel_resp = requests.get(u'{0}{1}{2}'.format(CURRENT_EXCEL_ROOT, boro, 'acc.xlsx'))
         filename = excel_resp.url.split('/')[-1]
-        open(os.path.join(path, filename), 'w').write(resp.content)
+        open(os.path.join(path, filename), 'w').write(excel_resp.content)
         sys.stderr.write(u"Wrote {0} to {1}\n".format(filename, path))
