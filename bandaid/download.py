@@ -24,8 +24,13 @@ try:
 except ImportError:
     import StringIO
 import sys
+import xlrd
 import zipfile
 
+from utility import month2num
+
+CURRENT_EXCEL_ROOT = u'http://www.nyc.gov/html/nypd/downloads/excel/traffic_data/'
+CURRENT_PDF_ROOT = u'http://www.nyc.gov/html/nypd/downloads/pdf/traffic_data/'
 TRAFFIC_ROOT = u'http://www.nyc.gov/html/nypd/downloads/zip/traffic_data/'
 ACC_TEMPLATE = TRAFFIC_ROOT + u'{year}_{month:0>2}_acc.zip'
 SUM_TEMPLATE = TRAFFIC_ROOT + u'{year}_{month:0>2}_sum.zip'
@@ -83,8 +88,40 @@ if __name__ == '__main__':
                 sys.stderr.write(u"Downloaded {0} ({1} bytes), unzipping...\n".format(
                     path, len(resp.content)))
                 save_archive(archive_path, resp.content, year, month)
+            else:
+                sys.stderr.write(u"Couldn't download {0}: {1}...\n".format(
+                    path, resp.status_code))
 
         if all([c != 200 for c in codes.values()]):
             sys.stderr.write(u"No more archives! {codes} at {year}/{month} "
                              u"\n".format(year=year, month=month, codes=codes))
             break
+
+    # Also download current acc reports in case NYPD forgot to add them to the
+    # zip archive
+    sys.stderr.write(u"Downloading current acc reports...\n")
+
+    resp = requests.get(CURRENT_EXCEL_ROOT + u'cityacc.xlsx')
+
+    sh = xlrd.open_workbook(file_contents=resp.content).sheet_by_index(0)
+    _, cur_month_name, cur_year = sh.row(1)[0].value.split()
+
+    year = month2num(cur_month_name)
+    month = int(cur_year)
+
+    path = os.path.join(archive_path, str(year), u'{:0>2}'.format(month))
+    try:
+        os.makedirs(path)
+    except OSError:
+        pass
+
+    for boro in ('city', 'bk', 'bx', 'mn', 'qn', 'si'):
+        pdf_resp = requests.get(u'{0}{1}{2}'.format(CURRENT_PDF_ROOT, boro, 'acc.pdf'))
+        filename = pdf_resp.url.split('/')[-1]
+        open(os.path.join(path, filename), 'w').write(resp.content)
+        sys.stderr.write(u"Wrote {0} to {1}\n".format(filename, path))
+
+        excel_resp = requests.get(u'{0}{1}{2}'.format(CURRENT_EXCEL_ROOT, boro, 'acc.xlsx'))
+        filename = excel_resp.url.split('/')[-1]
+        open(os.path.join(path, filename), 'w').write(resp.content)
+        sys.stderr.write(u"Wrote {0} to {1}\n".format(filename, path))
