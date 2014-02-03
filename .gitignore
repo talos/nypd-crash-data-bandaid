@@ -1,10 +1,12 @@
 .DS_Store
 /public/data/*
 map/public/data
-config.ini
+config.json
 tmp/
 *.pyc
 map/build
 map/node_modules
 public/feed.xml
 .s3cfg
+*.db
+*.sql

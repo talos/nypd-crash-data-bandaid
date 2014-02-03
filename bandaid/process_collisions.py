@@ -17,21 +17,35 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licences/>
 
+import csv
+import json
 import os
 import re
 import sys
 import time
 import xlrd
 
-from utility import ParserException, month2num, columnize
+from utility import ParserException, month2num, columnize, warn, ZIPS
 
 try:
-    import pygeocoder
-    from pygeolib import GeocoderError
-    GEOCODER = pygeocoder.Geocoder
-except ImportError:
-    sys.stderr.write(u"No geocoder available\n")
-    GEOCODER = None
+    import nyc_geoclient
+    config = json.load(open(os.path.join(os.path.dirname(__file__), 'config.json'), 'r'))
+    app_id = config['nyc_geoclient_id']
+    app_key = config['nyc_geoclient_key']
+    NYC_GEOCODER = nyc_geoclient.Geoclient(app_id, app_key)
+
+    try:
+        import pygeocoder
+        from pygeolib import GeocoderError
+        GOOGLE_GEOCODER = pygeocoder.Geocoder
+    except Exception as e:
+        warn(u"Can't use Google geocoder: {0}\n".format(e))
+
+        GOOGLE_GEOCODER = None
+
+except Exception as e:
+    warn(u"Can't use NYC geocoder: {0}\n".format(e))
+    NYC_GEOCODER = None
 
 INTERSECTIONS_LONLAT_PATH = 'public/intersections.txt'
 
@@ -86,6 +100,74 @@ CONTRIBUTING_FACTORS = set([u'Driver inexperience',
                             u'Drugs (illegal)'])
 CONTRIBUTING_COLUMNS = [columnize(v) for v in sorted(CONTRIBUTING_FACTORS)]
 
+GEOCLIENT_KEYS = [u'longitude',
+    u'latitude',
+    u'sanbornVolumeNumber1',
+    u'fireBattalion',
+    u'crossStreetNamesFlagIn',
+    u'fireCompanyType',
+    u'censusTract1990',
+    u'streetCode1',
+    u'dotStreetLightContractorArea',
+    u'streetCode2',
+    u'cityCouncilDistrict',
+    u'zipCode',
+    u'fireCompanyNumber',
+    u'sanitationDistrict',
+    u'healthArea',
+    u'communityDistrict',
+    u'lionNodeNumber',
+    u'firstStreetNameNormalized',
+    u'streetName1In',
+    u'boroughCode1In',
+    u'sanbornVolumeNumberSuffix1',
+    u'sanbornVolumeNumberSuffix2',
+    u'censusTract2000',
+    u'secondStreetNameNormalized',
+    u'interimAssistanceEligibilityIndicator',
+    u'geosupportFunctionCode',
+    u'firstStreetCode',
+    u'congressionalDistrict',
+    u'sanbornVolumeNumber2',
+    u'healthCenterDistrict',
+    u'xCoordinate',
+    u'assemblyDistrict',
+    u'yCoordinate',
+    u'streetName2',
+    u'streetName1',
+    u'numberOfStreetCodesAndNamesInList',
+    u'policePatrolBoroughCommand',
+    u'streetName2In',
+    u'policePrecinct',
+    u'communityDistrictNumber',
+    u'geosupportReturnCode',
+    u'communityDistrictBoroughCode',
+    u'dcpPreferredLgcForStreet2',
+    u'dcpPreferredLgcForStreet1',
+    u'secondStreetCode',
+    u'sanitationCollectionSchedulingSectionAndSubsection',
+    u'workAreaFormatIndicatorIn',
+    u'fireDivision',
+    u'listOfPairsOfLevelCodes',
+    u'sanbornPageNumber1',
+    u'intersectingStreet2',
+    u'intersectingStreet1',
+    u'sanbornPageNumber2',
+    u'firstBoroughName',
+    u'civilCourtDistrict',
+    u'stateSenatorialDistrict',
+    u'censusTract2010',
+    u'sanbornBoroughCode1',
+    u'sanbornBoroughCode2',
+    u'numberOfIntersectingStreets',
+    u'communitySchoolDistrict',
+    u'source_precinct',
+    u'reasonCode',
+    u'message',
+    u'googleLongitude',
+    u'googleLatitude',
+    u'googleMessage']
+
 # Row types
 DATA = 'data'
 DATA_CONTINUATION = 'continuation'  # for when a cell crosses to the next sheet
@@ -114,52 +196,120 @@ BORO_NUM_TO_NAME = {
     '5': 'Staten Island'
 }
 
+csv.register_dialect('nypd-tab', strict=0, delimiter='\t', doublequote=1,
+                     lineterminator='\n', quotechar='"', quoting=0,
+                     skipinitialspace=0)
+
 def read_intersections_lonlat_dict(path):
     """
     Generate a dict of all intersections for quick matching lon/lat.
     """
     result = {}
-    with open(path) as f:
-        for line in f:
-            line = line.strip('\n\r')
-            boro, precinct, street1, street2, lon, lat, in_precinct, dist_from_precinct = \
-                line.split(u'\t')
-            boro = int(boro)
-            street1 = street1.lower()
-            street2 = street2.lower()
-            key1 = (boro, street1, street2)
-            key2 = (boro, street2, street1)
-            if not key1 in result and not key2 in result:
-                result[key1] = (lon, lat)
+    try:
+        with open(path) as f:
+            for line in csv.DictReader(f, dialect='nypd-tab'):
+                boro = int(line['boroughCode1In'])
+                street1 = line['streetName1In'].lower()
+                street2 = line['streetName2In'].lower()
+                key1 = (boro, street1, street2)
+                key2 = (boro, street2, street1)
+                if not key1 in result and not key2 in result:
+                    result[key1] = (line['longitude'], line['latitude'])
+    except IOError:
+        pass
 
     return result
 
 
-def write_intersections_file(borocode, precinct, street1, street2, lonlat):
-    with open(INTERSECTIONS_LONLAT_PATH, 'a') as f:
-        f.write(u"\t".join([str(borocode), str(precinct), street1, street2,
-                            str(lonlat[0]), str(lonlat[1]), '', '']) + u'\n')
-
-
-def geocode_intersection(street1, street2, borocode):
+def geocode_intersection(street1, street2, borocode, precinct):
     """
-    Make external call to Google to get intersection, if possible.
+    Make external call to NYC's geocoder to get intersection.  If Geoclient
+    can't do it, falls back on Google, but still returns Geoclient's error
+    message.
     """
-    try:
-        boro_name = BORO_NUM_TO_NAME[str(borocode)]
-        sys.stderr.write(u"Trying to geocode {0} and {1}, {2}\n".format(
-            street1, street2, boro_name))
-        # kwarg `exactly_one=False` will return a list of possibilities, but
-        # experience shows that these options are all bad.
-        resp = GEOCODER.geocode(u"{0} and {1}, {2}, NY".format(street1,
-                                                               street2,
-                                                               BORO_NUM_TO_NAME[str(borocode)]))
-        time.sleep(4)
-        lonlat = (str(resp.longitude), str(resp.latitude), )
-        return lonlat
-    except GeocoderError as e:
-        sys.stderr.write(unicode(e) + u'\n')
-        return None
+
+    # Basic response object, borrowing Geoclient's terminology
+    resp = {
+        u'streetName1In': street1,
+        u'streetName2In': street2,
+        u'boroughCode1In': borocode,
+        u'source_precinct': precinct
+    }
+
+    if NYC_GEOCODER:
+        borough = ['manhattan', 'bronx', 'brooklyn', 'queens',
+                   'staten island'][int(borocode) - 1]
+        resp = NYC_GEOCODER.intersection(street1, street2, borough)
+
+        if u'latitude' not in resp or u'longitude' not in resp:
+            warn(u"Could not use NYC geocoder: {0}".format(resp[u'message']))
+        else:
+            if int(precinct) != int(resp.get('policePrecinct')):
+                warn(u"Precinct mismatch: {0} vs. {1}".format(
+                    precinct, resp.get(u'policePrecinct')))
+
+        # Successful geocode via NYC
+        if u'message' not in resp:
+            return resp
+
+    if GOOGLE_GEOCODER:
+        try:
+            boro_name = BORO_NUM_TO_NAME[str(borocode)]
+
+            warn(u"Falling back to google to geocode {0} and {1}, {2}".format(
+                street1, street2, boro_name))
+            # kwarg `exactly_one=False` will return a list of possibilities,
+            # but experience shows that these options are all bad.
+
+            google_resp = GOOGLE_GEOCODER.geocode(u"{0} and {1}, {2}, NY".format(
+                street1, street2, BORO_NUM_TO_NAME[str(borocode)]))
+
+            # Double check zip code to make sure it's in the city
+            try:
+                confirmed_borough = False
+                confirmed_zip = False
+                found_zip = None
+
+                for comp in google_resp.data[0][u'address_components']:
+                    if comp[u'long_name'].lower() == boro_name.lower():
+                        confirmed_borough = True
+                    if u'postal_code' in comp[u'types']:
+                        found_zip = comp[u'long_name']
+                        zip_borough = ZIPS.get(found_zip)
+                        confirmed_zip = zip_borough.lower() == boro_name.lower()
+
+                resp.update({
+                    u'googleLongitude': unicode(google_resp.longitude),
+                    u'googleLatitude': unicode(google_resp.latitude)
+                })
+
+                if confirmed_zip and confirmed_borough:
+                    resp.update({
+                        u'longitude': unicode(google_resp.longitude),
+                        u'latitude': unicode(google_resp.latitude)
+                    })
+                else:
+
+                    resp[u'googleMessage'] = u"Could not confirm Google's geocoding: {0}".format(
+                        {'confirmed_borough': confirmed_borough,
+                         'confirmed_zip': confirmed_zip})
+                    if found_zip:
+                        resp[u'googleMessage'] += \
+                                u", Google found zip {0}, but that is not in {1}".format(
+                                    found_zip, boro_name)
+
+                    warn(resp[u'googleMessage'])
+
+            except Exception as e:
+                resp[u'googleMessage'] = u"Error confirming Google's geocoding: {0}".format(e)
+                warn(resp[u'googleMessage'])
+
+            time.sleep(4)
+
+        except GeocoderError as e:
+            warn(u"Google geocoder error: {0}".format(e))
+
+    return resp
 
 
 def print_header():
@@ -329,7 +479,7 @@ def identify_precinct(filename, rownum, row):
         raise ParserException(u"Could not identify precinct from", filename, rownum, row)
 
 
-def process_accidents(filename, intersections_lonlat_dict, already_processed):
+def process_collisions(filename, intersections_lonlat_dict, already_processed):
     """
     Convert a single Excel file to a more generous CSV format.
 
@@ -499,6 +649,7 @@ def process_accidents(filename, intersections_lonlat_dict, already_processed):
             data_missing_contributing = []
             missing_contributing = []
 
+    intersections_csv = None
     for row in filtered_rows:
         borocode = row[0]
         precinct = row[1]
@@ -515,20 +666,29 @@ def process_accidents(filename, intersections_lonlat_dict, already_processed):
         key2 = (borocode, street2.lower(), street1.lower())
         lonlat = intersections_lonlat_dict.get(key1) or intersections_lonlat_dict.get(key2)
 
+        fresh_intersections_csv = len(intersections_lonlat_dict) == 0
+
         if lonlat is None:
-            if GEOCODER is not None:
-                lonlat = geocode_intersection(street1, street2, borocode)
-            if lonlat is None:
-                lonlat = ('', '')
-            else:
+            if NYC_GEOCODER or GOOGLE_GEOCODER:
+                data = geocode_intersection(street1, street2, borocode, precinct)
+                lonlat = (str(data.get('longitude', '')), str(data.get('latitude', '')))
+
                 intersections_lonlat_dict[(borocode,
                                            street1.lower(),
                                            street2.lower())] = lonlat
                 intersections_lonlat_dict[(borocode,
                                            street2.lower(),
                                            street1.lower())] = lonlat
-                write_intersections_file(borocode, precinct, street1,
-                                             street2, lonlat)
+
+                if not intersections_csv:
+                    intersections_csv = csv.DictWriter(open(INTERSECTIONS_LONLAT_PATH, 'a'),
+                                                       GEOCLIENT_KEYS,
+                                                       dialect='nypd-tab',
+                                                       extrasaction='ignore')
+                    if fresh_intersections_csv:
+                        intersections_csv.writeheader()
+
+                intersections_csv.writerow(data)
 
         vehicles = {}
         contributing_factors = {}
@@ -624,9 +784,9 @@ def process_accidents(filename, intersections_lonlat_dict, already_processed):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        sys.stderr.write("""
+        warn("""
     usage: {0} <files>
-    \n""".format(sys.argv[0]))
+    """.format(sys.argv[0]))
         sys.exit(1)
 
     intersections_lonlat_dict = read_intersections_lonlat_dict(INTERSECTIONS_LONLAT_PATH)
@@ -635,8 +795,8 @@ if __name__ == '__main__':
     for path in sys.argv[1:]:
         name = os.path.basename(path).lower()
         if name.endswith('acc.xlsx') and not name.startswith('city'):
-            sys.stderr.write(u"{0}\n".format(path))
+            warn(u"{0}".format(path))
             try:
-                process_accidents(path, intersections_lonlat_dict, already_processed)
+                process_collisions(path, intersections_lonlat_dict, already_processed)
             except ParserException as e:
-                sys.stderr.write("Parser error: {0}\n".format(e))
+                warn("Parser error: {0}".format(e))

@@ -1,3 +1,4 @@
 xlrd==0.9.2
 pygeocoder==1.2
-requests==1.2.3
+requests==2.2.1
+nyc_geoclient==0.0.1

@@ -18,23 +18,23 @@
 # This updates the RSS feed.
 
 import os
+import json
 import stat
 import sys
 from datetime import datetime
 import PyRSS2Gen
-from ConfigParser import SafeConfigParser
 
-PARSER = SafeConfigParser()
-
-if not len(PARSER.read('config.ini')):
-    print """No config.ini file.  You must specify a config with the root URL
-for the feed.  See sample-config.ini ."""
+try:
+    config = json.load(open(os.path.join(os.path.dirname(__file__), 'config.json'), 'r'))
+except:
+    print """Could not read `config.json` file.  You must specify a config with
+the root URL for the feed in "rss_url".  See `sample-config.json`."""
     sys.exit(1)
 
 PRIVATE_DATA_PATH = 'public'
 PUBLIC_DATA_PATH = 'data'
 DATA_PATH = os.sep.join([PRIVATE_DATA_PATH, PUBLIC_DATA_PATH])
-URL = PARSER.get('settings', 'url') + '/' + PUBLIC_DATA_PATH
+URL = config['http://localhost'] + '/' + PUBLIC_DATA_PATH
 
 rss = PyRSS2Gen.RSS2(
     title = "NYPD Crash Data Bandaid",
