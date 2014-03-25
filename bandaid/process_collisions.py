@@ -323,7 +323,8 @@ def geocode_intersection(street1, street2, borocode, precinct):
             time.sleep(4)
 
         except GeocoderError as e:
-            warn(u"Google geocoder error: {0}".format(e))
+            resp[u'googleMessage'] = u"Google geocoder error: {0}".format(e)
+            warn(resp[u'googleMessage'])
 
     return resp
 
