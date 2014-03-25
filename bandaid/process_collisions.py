@@ -208,13 +208,14 @@ def read_intersections_lonlat_dict(path):
     try:
         with open(path) as f:
             for line in csv.DictReader(f, dialect='nypd-tab'):
-                boro = int(line['boroughCode1In'])
-                street1 = line['streetName1In'].lower()
-                street2 = line['streetName2In'].lower()
-                key1 = (boro, street1, street2)
-                key2 = (boro, street2, street1)
-                if not key1 in result and not key2 in result:
-                    result[key1] = (line['longitude'], line['latitude'])
+                if line['boroughCode1In'] and line['streetName1In'] and line['streetName2In']:
+                    boro = int(line['boroughCode1In'])
+                    street1 = line['streetName1In'].lower()
+                    street2 = line['streetName2In'].lower()
+                    key1 = (boro, street1, street2)
+                    key2 = (boro, street2, street1)
+                    if not key1 in result and not key2 in result:
+                        result[key1] = (line['longitude'], line['latitude'])
     except IOError:
         pass
 
@@ -241,6 +242,10 @@ def geocode_intersection(street1, street2, borocode, precinct):
                    'staten island'][int(borocode) - 1]
         resp = NYC_GEOCODER.intersection(street1, street2, borough)
 
+        if 'compass direction' in resp.get(u'message', u'').lower():
+            warn(u"Using arbitrary compass direction 'W' for double intersection")
+            resp = NYC_GEOCODER.intersection(street1, street2, borough, compassDirection='w')
+
         if u'latitude' not in resp or u'longitude' not in resp:
             warn(u"Could not use NYC geocoder: {0}".format(resp[u'message']))
         else:
@@ -256,6 +261,9 @@ def geocode_intersection(street1, street2, borocode, precinct):
         try:
             boro_name = BORO_NUM_TO_NAME[str(borocode)]
 
+            if boro_name.lower() == 'manhattan':
+                boro_name = 'New York'  # Google does better with this
+
             warn(u"Falling back to google to geocode {0} and {1}, {2}".format(
                 street1, street2, boro_name))
             # kwarg `exactly_one=False` will return a list of possibilities,
@@ -270,34 +278,42 @@ def geocode_intersection(street1, street2, borocode, precinct):
                 confirmed_zip = False
                 found_zip = None
 
-                for comp in google_resp.data[0][u'address_components']:
-                    if comp[u'long_name'].lower() == boro_name.lower():
-                        confirmed_borough = True
-                    if u'postal_code' in comp[u'types']:
-                        found_zip = comp[u'long_name']
-                        zip_borough = ZIPS.get(found_zip)
-                        confirmed_zip = zip_borough.lower() == boro_name.lower()
+                relevant_google_resp_data = None
+                for google_resp_data in google_resp.data:
+                    if 'intersection' in google_resp_data['types']:
+                        relevant_google_resp_data = google_resp_data
 
-                resp.update({
-                    u'googleLongitude': unicode(google_resp.longitude),
-                    u'googleLatitude': unicode(google_resp.latitude)
-                })
+                if relevant_google_resp_data:
+                    for comp in google_resp.data[0][u'address_components']:
+                        if comp.get(u'long_name', '').lower() == boro_name.lower():
+                            confirmed_borough = True
+                        if u'postal_code' in comp.get(u'types', []):
+                            found_zip = comp.get(u'long_name')
+                            zip_borough = ZIPS.get(found_zip)
+                            confirmed_zip = zip_borough.lower() == boro_name.lower()
 
-                if confirmed_zip and confirmed_borough:
                     resp.update({
-                        u'longitude': unicode(google_resp.longitude),
-                        u'latitude': unicode(google_resp.latitude)
+                        u'googleLongitude': unicode(google_resp.longitude),
+                        u'googleLatitude': unicode(google_resp.latitude)
                     })
+
+                    if confirmed_zip and confirmed_borough:
+                        resp.update({
+                            u'longitude': unicode(google_resp.longitude),
+                            u'latitude': unicode(google_resp.latitude)
+                        })
+                    else:
+                        resp[u'googleMessage'] = u"Could not confirm Google's geocoding: {0}".format(
+                            {'confirmed_borough': confirmed_borough,
+                             'confirmed_zip': confirmed_zip})
+                        if found_zip:
+                            resp[u'googleMessage'] += \
+                                    u", Google found zip {0}, but that is not in {1}".format(
+                                        found_zip, boro_name)
+
+                        warn(resp[u'googleMessage'])
                 else:
-
-                    resp[u'googleMessage'] = u"Could not confirm Google's geocoding: {0}".format(
-                        {'confirmed_borough': confirmed_borough,
-                         'confirmed_zip': confirmed_zip})
-                    if found_zip:
-                        resp[u'googleMessage'] += \
-                                u", Google found zip {0}, but that is not in {1}".format(
-                                    found_zip, boro_name)
-
+                    resp[u'googleMessage'] = u"No intersection data for Google's geocoding"
                     warn(resp[u'googleMessage'])
 
             except Exception as e:
