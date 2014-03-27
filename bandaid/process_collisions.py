@@ -289,7 +289,7 @@ def geocode_intersection(street1, street2, borocode, precinct):
                             confirmed_borough = True
                         if u'postal_code' in comp.get(u'types', []):
                             found_zip = comp.get(u'long_name')
-                            zip_borough = ZIPS.get(found_zip)
+                            zip_borough = ZIPS.get(found_zip, '')
                             confirmed_zip = zip_borough.lower() == boro_name.lower()
 
                     resp.update({
