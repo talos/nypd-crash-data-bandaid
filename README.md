@@ -1,3 +1,47 @@
+# Good news!
+
+The NYPD is now uploading collision data to the NYC Open Data portal.  You can
+[find it here][].
+
+  [find it here]: https://data.cityofnewyork.us/NYC-BigApps/NYPD-Motor-Vehicle-Collisions/h9gi-nx95
+
+This data is of vastly superior quality to the old release, correcting most of
+the major deficiencies of the old data.  It is:
+
+  * Machine readable in multiple open formats, instead of an Excel file
+  * Published as a feed, rather than a monthly document drop
+  * Granular to the individual incident, not aggregated by intersection and
+    month
+  * Geocoded with lon/lat, although still only to the nearest intersection
+
+Since the data now published is not aggregated, there is new information
+available:
+
+  * Time of day of the incident
+  * Incidents that occurred off an intersection, for example in a parking lot
+    (although these are not geocoded at all.)
+
+Unfortunately, certain pieces of data are missing from the release, as compared
+to the old format:
+
+  * Types of vehicles involved (bus, semi, sanitation vehicle, etc.)
+  * Passengers in cars injured/killed (the new release only counds
+    "Pedestrians", "Cyclists", and "Drivers", while the old release also
+    tabulated "Passengers"
+  * Reporting precinct
+  * Data going back to August 2011 (the current release picks up in July 2012).
+
+The new releases also do not include moving violations data.
+
+I'll leave the Bandaid online as a historical record, containing older data,
+but the collisions will likely no longer be updated.  Moving violations will
+continue to update as long as the NYPD releases them.
+
+You can read a statement from [BetaNYC][] [here][].
+
+  [BetaNYC]: http://betanyc.us/
+  [here]: https://docs.google.com/document/d/1Z7cMUCtEjXoTr1Oys7Y14ERxBVfQ9X_Xl7aARAqenPw/edit
+
 # NYPD Crash Data Bandaid
 
 NYPD traffic collision [data][] has a booboo. This eases the pain.
